@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>MedStudy LMS</title>
+<title>Not-a-Doctor LMS</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════
@@ -330,9 +330,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',Helvetica,Aria
   ════════════════════════════════════════════════════ -->
 <script>
 const SITE = {
-  name:     "MedStudy",
+  name:     "Not-a-Doctor",
   tagline:  "3rd Year · Medicine",
-  welcome:  "When the Uni moodle crashes, come here! Select a course from the sidebar to begin.",
+  welcome:  "When the Uni moodle crashes, come here! Select a course from the sidebar to begin!",
   author:   "Medical Gods"          /* shown in sidebar footer */
 };
 
@@ -439,11 +439,11 @@ const COURSES = [
 ══════════════════════════════════════════════════════ */
 (function(){
   /* set site name */
-  document.title = SITE.name + ' — LMS';
+  document.title = SITE.name + '  LMS';
   document.getElementById('logoName').innerHTML = SITE.name.replace(/(\w+)$/, '<span>$1</span>');
   document.getElementById('logoMark').textContent = SITE.name.charAt(0);
   document.getElementById('sbFooter').innerHTML =
-    'Prepared by <a href="#">' + SITE.author + '</a><br>© ' + new Date().getFullYear() + ' · ' + SITE.tagline;
+    'Built by <a href="#">' + SITE.author + '</a><br>© ' + new Date().getFullYear() + ' · ' + SITE.tagline;
 
   /* count totals */
   var totalCourses = 0, totalQ = 0;
