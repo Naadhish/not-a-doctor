@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Pharmacology Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c14;--surface:#0e1420;--surface2:#141c2e;
+  --border:rgba(255,255,255,0.07);--accent:#00e5b0;--accent2:#0090ff;
+  --danger:#ff4d6d;--text:#e8edf5;--muted:#6b7a99;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'DM Sans',Helvetica,Arial,sans-serif;
+  min-height:100vh;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    -webkit-radial-gradient(20% 10% ellipse,rgba(0,144,255,.06) 0%,transparent 60%),
+    -webkit-radial-gradient(80% 90% ellipse,rgba(0,229,176,.05) 0%,transparent 60%);
+  background:
+    radial-gradient(ellipse at 20% 10%,rgba(0,144,255,.06) 0%,transparent 60%),
+    radial-gradient(ellipse at 80% 90%,rgba(0,229,176,.05) 0%,transparent 60%);
+}
+.wrapper{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-box-align:center;-webkit-align-items:center;align-items:center;
+  -webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;
+  padding:24px 16px;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom));
+}
+.screen{display:none;width:100%;max-width:720px;}
+.screen.active{
+  display:block;
+  -webkit-animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both;
+  animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both;
+}
+@-webkit-keyframes fadeUp{from{opacity:0;-webkit-transform:translateY(20px);transform:translateY(20px)}to{opacity:1;-webkit-transform:translateY(0);transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@-webkit-keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+@-webkit-keyframes pop{0%,100%{-webkit-transform:scale(1);transform:scale(1)}40%{-webkit-transform:scale(1.015);transform:scale(1.015)}}
+@keyframes pop{0%,100%{transform:scale(1)}40%{transform:scale(1.015)}}
+@-webkit-keyframes shake{0%,100%{-webkit-transform:translateX(0)}25%{-webkit-transform:translateX(-5px)}75%{-webkit-transform:translateX(5px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* ── START ── */
+.start-hero{text-align:center;padding:52px 20px 48px;}
+.pill{
+  display:-webkit-inline-flex;display:inline-flex;
+  -webkit-align-items:center;align-items:center;gap:8px;
+  background:rgba(0,229,176,.08);border:1px solid rgba(0,229,176,.2);
+  color:var(--accent);font-size:11px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:6px 16px;border-radius:100px;margin-bottom:26px;
+}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);
+  -webkit-animation:blink 2s infinite;animation:blink 2s infinite;display:inline-block;}
+h1{
+  font-family:'Syne',Helvetica,sans-serif;
+  font-size:clamp(1.9rem,7vw,3.3rem);
+  font-weight:800;line-height:1.05;letter-spacing:-.02em;margin-bottom:14px;
+  background:-webkit-linear-gradient(135deg,#fff 30%,rgba(0,229,176,.8));
+  background:linear-gradient(135deg,#fff 30%,rgba(0,229,176,.8));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;color:#fff;/* fallback */
+}
+.start-p{color:var(--muted);font-size:.98rem;line-height:1.65;max-width:450px;margin:0 auto 34px;}
+.stats-row{
+  display:-webkit-flex;display:flex;
+  -webkit-justify-content:center;justify-content:center;
+  gap:10px;margin-bottom:32px;-webkit-flex-wrap:wrap;flex-wrap:wrap;
+}
+.stat-chip{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:14px 20px;text-align:center;min-width:110px;
+}
+.stat-val{font-family:'Syne',Helvetica,sans-serif;font-size:1.7rem;font-weight:700;color:var(--accent);line-height:1;}
+.stat-lbl{font-size:.68rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:4px;}
+.tog-row{
+  display:-webkit-flex;display:flex;
+  -webkit-justify-content:center;justify-content:center;
+  gap:10px;margin-bottom:28px;-webkit-flex-wrap:wrap;flex-wrap:wrap;
+}
+.tog{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--muted);font-family:'DM Sans',Helvetica,sans-serif;
+  font-size:.85rem;padding:11px 18px;border-radius:100px;
+  cursor:pointer;-webkit-appearance:none;appearance:none;
+  min-height:44px;min-width:44px;
+  -webkit-transition:background .2s,border-color .2s,color .2s;
+  transition:background .2s,border-color .2s,color .2s;
+  font-weight:500;
+}
+.tog.on{background:rgba(0,229,176,.1);border-color:rgba(0,229,176,.35);color:var(--accent);}
+.btn-primary{
+  background:var(--accent);color:#000;
+  font-family:'Syne',Helvetica,sans-serif;font-weight:700;font-size:1rem;
+  letter-spacing:.03em;padding:16px 42px;border-radius:100px;
+  border:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  min-height:54px;min-width:160px;
+  -webkit-transition:-webkit-transform .2s,box-shadow .2s;
+  transition:transform .2s,box-shadow .2s;
+  display:inline-block;
+}
+
+/* ── QUIZ ── */
+.quiz-hdr{
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:center;align-items:center;
+  gap:12px;margin-bottom:18px;
+}
+.q-counter{font-family:'Syne',Helvetica,sans-serif;font-size:.8rem;font-weight:600;color:var(--muted);white-space:nowrap;}
+.q-counter strong{color:var(--text);}
+.prog-wrap{-webkit-flex:1;flex:1;height:4px;background:var(--surface2);border-radius:100px;overflow:hidden;}
+.prog-fill{
+  height:100%;
+  background:-webkit-linear-gradient(left,var(--accent2),var(--accent));
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  border-radius:100px;
+  -webkit-transition:width .5s cubic-bezier(.22,1,.36,1);
+  transition:width .5s cubic-bezier(.22,1,.36,1);
+}
+.timer-chip{
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:center;align-items:center;gap:6px;
+  font-family:'Syne',Helvetica,sans-serif;font-size:.8rem;font-weight:600;
+  color:var(--muted);white-space:nowrap;
+}
+.t-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--accent);
+  display:inline-block;
+  -webkit-animation:blink 1.5s infinite;animation:blink 1.5s infinite;
+}
+.q-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;padding:26px 22px;margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.q-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:-webkit-linear-gradient(left,var(--accent2),var(--accent));
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+}
+.q-num{font-family:'Syne',Helvetica,sans-serif;font-size:.7rem;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.q-text{font-size:1.02rem;line-height:1.65;color:var(--text);}
+.opts-list{
+  display:-webkit-flex;display:flex;
+  -webkit-flex-direction:column;flex-direction:column;gap:9px;
+}
+.opt{
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:14px;padding:13px 16px;
+  text-align:left;cursor:pointer;
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:flex-start;align-items:flex-start;gap:12px;
+  -webkit-transition:border-color .18s,background .18s;
+  transition:border-color .18s,background .18s;
+  font-family:'DM Sans',Helvetica,sans-serif;
+  font-size:.9rem;line-height:1.5;color:var(--text);
+  width:100%;-webkit-appearance:none;appearance:none;
+  min-height:50px;
+}
+.opt-ltr{
+  -webkit-flex-shrink:0;flex-shrink:0;
+  width:26px;height:26px;border-radius:7px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  display:-webkit-flex;display:flex;
+  -webkit-align-items:center;align-items:center;
+  -webkit-justify-content:center;justify-content:center;
+  font-family:'Syne',Helvetica,sans-serif;
+  font-size:.7rem;font-weight:700;color:var(--muted);
+  margin-top:1px;
+  -webkit-transition:background .18s,border-color .18s,color .18s;
+  transition:background .18s,border-color .18s,color .18s;
+}
+.opt:disabled{cursor:default;}
+.opt.correct{
+  border-color:rgba(0,229,176,.6);background:rgba(0,229,176,.08);
+  -webkit-animation:pop .35s ease;animation:pop .35s ease;
+}
+.opt.correct .opt-ltr{background:rgba(0,229,176,.2);border-color:var(--accent);color:var(--accent);}
+.opt.wrong{
+  border-color:rgba(255,77,109,.5);background:rgba(255,77,109,.06);
+  -webkit-animation:shake .35s ease;animation:shake .35s ease;
+}
+.opt.wrong .opt-ltr{background:rgba(255,77,109,.15);border-color:var(--danger);color:var(--danger);}
+.opt.dim{opacity:.3;}
+.fb{
+  border-radius:12px;padding:12px 16px;font-size:.87rem;font-weight:500;margin-bottom:12px;
+  display:none;
+  -webkit-align-items:flex-start;align-items:flex-start;gap:10px;
+  -webkit-animation:fadeUp .3s ease both;animation:fadeUp .3s ease both;
+}
+.fb.show{display:-webkit-flex;display:flex;}
+.fb.ok{background:rgba(0,229,176,.1);border:1px solid rgba(0,229,176,.25);color:var(--accent);}
+.fb.ko{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.25);color:#ff8fa3;}
+.fb-icon{font-weight:700;-webkit-flex-shrink:0;flex-shrink:0;font-style:normal;}
+.btn-next{
+  background:-webkit-linear-gradient(135deg,var(--accent2),var(--accent));
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  color:#000;font-family:'Syne',Helvetica,sans-serif;font-weight:700;
+  font-size:.87rem;letter-spacing:.04em;
+  padding:14px 30px;border-radius:100px;border:none;cursor:pointer;
+  display:none;float:right;margin-top:6px;
+  -webkit-appearance:none;appearance:none;min-height:48px;
+  -webkit-transition:-webkit-transform .2s,box-shadow .2s;
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-next.show{
+  display:inline-block;
+  -webkit-animation:fadeUp .3s ease both;animation:fadeUp .3s ease both;
+}
+.cf::after{content:'';display:table;clear:both;}
+.qc{-webkit-transition:opacity .16s ease;transition:opacity .16s ease;}
+.qc.out{opacity:0;}
+
+/* ── RESULTS ── */
+.result-wrap{text-align:center;padding:12px 0;}
+.ring-box{position:relative;display:inline-block;margin-bottom:0;}
+.ring-box svg{display:block;}
+.pct-overlay{
+  position:absolute;inset:0;
+  display:-webkit-flex;display:flex;
+  -webkit-flex-direction:column;flex-direction:column;
+  -webkit-align-items:center;align-items:center;
+  -webkit-justify-content:center;justify-content:center;
+}
+.pct-n{font-family:'Syne',Helvetica,sans-serif;font-size:2.3rem;font-weight:800;line-height:1;color:var(--text);}
+.pct-s{font-size:.68rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:2px;}
+.res-title{font-family:'Syne',Helvetica,sans-serif;font-size:1.6rem;font-weight:700;margin:18px 0 6px;letter-spacing:-.01em;}
+.res-sub{color:var(--muted);font-size:.9rem;margin-bottom:28px;}
+.res-grid{
+  display:-webkit-flex;display:flex;
+  gap:10px;margin-bottom:28px;
+  -webkit-justify-content:center;justify-content:center;
+}
+.res-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:18px 12px;text-align:center;
+  -webkit-flex:1;flex:1;min-width:90px;
+}
+.res-val{font-family:'Syne',Helvetica,sans-serif;font-size:1.8rem;font-weight:700;line-height:1;}
+.res-lbl{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:5px;}
+.res-actions{
+  display:-webkit-flex;display:flex;gap:10px;
+  -webkit-justify-content:center;justify-content:center;
+  -webkit-flex-wrap:wrap;flex-wrap:wrap;
+}
+.btn-outline{
+  background:transparent;border:1.5px solid var(--border);color:var(--text);
+  font-family:'DM Sans',Helvetica,sans-serif;font-weight:500;font-size:.88rem;
+  padding:13px 24px;border-radius:100px;cursor:pointer;
+  -webkit-appearance:none;appearance:none;min-height:48px;
+  -webkit-transition:border-color .2s,background .2s;
+  transition:border-color .2s,background .2s;
+}
+@media(max-width:420px){
+  .q-card{padding:20px 14px;}
+  .q-text{font-size:.95rem;}
+  .opt{padding:11px 12px;font-size:.86rem;}
+  .res-val{font-size:1.5rem;}
+  .start-hero{padding:40px 10px 36px;}
+  h1{font-size:1.85rem;}
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- START -->
+  <div id="sStart" class="screen active">
+    <div class="start-hero">
+      <div class="pill"><span class="pill-dot"></span>Medical Sciences</div>
+      <h1>Pharmacology<br>Practice Quiz</h1>
+      <p class="start-p">Master pharmacokinetics, drug mechanisms, clinical pharmacology, and antimicrobial agents — all exam questions in one place.</p>
+      <div class="stats-row">
+        <div class="stat-chip"><div class="stat-val" id="totalN">220</div><div class="stat-lbl">Questions</div></div>
+        <div class="stat-chip"><div class="stat-val">5</div><div class="stat-lbl">Choices Each</div></div>
+        <div class="stat-chip"><div class="stat-val">&#8734;</div><div class="stat-lbl">Attempts</div></div>
+      </div>
+      <div class="tog-row">
+        <button class="tog on" id="btnShuffle" type="button">&#128256; Shuffle</button>
+        <button class="tog" id="btnReview" type="button">&#128203; Review Mode</button>
+      </div>
+      <button class="btn-primary" id="btnStart" type="button">Begin Quiz &#8594;</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="sQuiz" class="screen">
+    <div class="quiz-hdr">
+      <div class="q-counter">Q <strong id="qNum">1</strong>&nbsp;/&nbsp;<strong id="qTot">220</strong></div>
+      <div class="prog-wrap"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+      <div class="timer-chip"><span class="t-dot"></span><span id="timerEl">0:00</span></div>
+    </div>
+    <div class="qc" id="qContent">
+      <div class="q-card">
+        <div class="q-num" id="qLabel">Question 1</div>
+        <div class="q-text" id="qText"></div>
+      </div>
+      <div class="opts-list" id="optsList"></div>
+      <div class="fb" id="fbBar"><em class="fb-icon" id="fbIcon"></em><span id="fbText"></span></div>
+      <div class="cf">
+        <button class="btn-next" id="btnNext" type="button">Next Question &#8594;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="sResult" class="screen result-wrap">
+    <div class="ring-box">
+      <svg width="148" height="148" viewBox="0 0 148 148">
+        <defs>
+          <linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#0090ff"/>
+            <stop offset="100%" stop-color="#00e5b0"/>
+          </linearGradient>
+        </defs>
+        <circle cx="74" cy="74" r="62" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+        <circle id="ringPath" cx="74" cy="74" r="62" fill="none"
+          stroke="url(#rg)" stroke-width="10" stroke-linecap="round"
+          stroke-dasharray="389.56" stroke-dashoffset="389.56"
+          transform="rotate(-90 74 74)"
+          style="-webkit-transition:stroke-dashoffset 1.1s ease;transition:stroke-dashoffset 1.1s ease;"/>
+      </svg>
+      <div class="pct-overlay">
+        <div class="pct-n" id="resPct"></div>
+        <div class="pct-s">Score</div>
+      </div>
+    </div>
+    <div class="res-title" id="resTitle"></div>
+    <div class="res-sub" id="resSub"></div>
+    <div class="res-grid">
+      <div class="res-card"><div class="res-val" id="resC" style="color:var(--accent)"></div><div class="res-lbl">Correct</div></div>
+      <div class="res-card"><div class="res-val" id="resW" style="color:var(--danger)"></div><div class="res-lbl">Incorrect</div></div>
+      <div class="res-card"><div class="res-val" id="resT" style="color:var(--accent2)"></div><div class="res-lbl">Time Spent</div></div>
+    </div>
+    <div class="res-actions">
+      <button class="btn-outline" id="btnTryAgain" type="button">&#8617; Try Again</button>
+      <button class="btn-primary" id="btnNewSession" type="button">New Session &#8594;</button>
+    </div>
+  </div>
+
+</div>
+<script>
+var QS=[
+{q:"From which drug formulation will absorption in the GI tract be quicker?",o:["Solution","Suspension","Tablets","Capsule","Dragee"],a:0},
+{q:"What is typical for injectable administration?",o:["Quicker development of effect than oral administration","Can be given to unconscious patients","Can use drugs destroyed in the stomach","Drugs must be sterile","All of the above"],a:4},
+{q:"The most rapid development of effect occurs with which route of administration?",o:["Subcutaneously","Intramuscular","Intravenously","Oral","Sublingual"],a:2},
+{q:"What does clearance characterize?",o:["Rate of absorption","Completeness of absorption","Character of distribution","Concentration of active form in blood","Rate of elimination"],a:4},
+{q:"Indicate a parenteral way of administration:",o:["Oral","Sublingual","Rectal","Inhalational","In stomach by tube"],a:3},
+{q:"What is typical for inhalational administration?",o:["Slow development of effect","Quick development of effect","Can administer irritating substances","Drug must be sterilized","Possibility of gases administration"],a:4},
+{q:"What is typical for rectal administration?",o:["Quick development of effect","Necessity to stick to diet","Drug must be sterile","Drug enters circulation without hepatic metabolization","Only suppositories can be administered"],a:3},
+{q:"Everything listed belongs to mechanisms of drug transport EXCEPT:",o:["Water diffusion","Water hydrolysis","Lipid diffusion","Pinocytosis and endocytosis","Translocation with special transporters"],a:1},
+{q:"Termination of drug action means that:",o:["Drug should be excreted from the body","Metabolism always increases water solubility","Metabolism always removes pharmacological activity","Hepatic metabolization and renal excretion are the two main mechanisms","Distribution in extravasal space always terminates action"],a:0},
+{q:"What does half-life time characterize?",o:["Rate of absorption","Character of distribution","Intensity of metabolization","Rate of elimination","Binding to plasma proteins"],a:3},
+{q:"What does 'pharmacokinetics' include?",o:["Absorption of drugs","Types of drug action","Mechanisms of primary pharmacological reactions","Pharmacological effects","Side effects"],a:0},
+{q:"Conjugation of drugs with glucuronic acid:",o:["Decreases water solubility","Usually leads to inactivation of drugs","Is an example of first phase metabolization","Is the main way of metabolization in newborns","Is catalyzed by cytochrome P450"],a:1},
+{q:"Drugs with zero-order kinetics are characterized by:",o:["Comprising most drugs","Decreasing blood concentration by exponent","Half-life independent from dose","Linear concentration-time curve","Elimination of constant drug amount per time unit"],a:4},
+{q:"Which notion is correct?",o:["IV drugs have first-order elimination","Inhalational route has very slow absorption","Passive diffusion requires transport proteins","Bioavailability of IV drugs is 100%","High distribution volume indicates quick metabolization"],a:3},
+{q:"Steady-state is 10 mg/l, half-life is 2 hours. When will concentration reach 1.25 mg/l after stopping?",o:["1 hour","2 hours","3 hours","4 hours","6 hours"],a:4},
+{q:"During continuous IV infusion, time needed to reach steady-state concentration:",o:["4 half-life periods","3 half-life periods","2 half-life periods","1 half-life period","Twice the infusion time"],a:0},
+{q:"After IV administration of 100 mg, blood concentration is 10 mg/l. What is the distribution volume?",o:["10 liters","0.1 liter","90 liters","110 liters","1000 liters"],a:0},
+{q:"The following are all first phase metabolization reactions EXCEPT:",o:["Hydrolysis","Oxidation","Reduction","Demethylation","Acetylation"],a:4},
+{q:"The following are all second phase metabolization reactions EXCEPT:",o:["Methylation","Acetylation","Sulfatation","Conjugation with glycine","N-oxidation"],a:4},
+{q:"Which particularities of children should be considered during drug dosing?",o:["More rapid absorption","BBB permeability is higher than in adults","Microsomal enzyme activity is lower than in adults","Glomerular filtration rate is lower than in adults","All listed above"],a:4},
+{q:"What is the name for drug accumulation in the body under repeated administrations?",o:["Idiosyncrasy","Sensibilization","Summation","Material cumulation","Functional cumulation"],a:3},
+{q:"Which phenomenon can occur during concomitant drug administration?",o:["Idiosyncrasy","Functional cumulation","Tolerance","Material cumulation","Synergism"],a:4},
+{q:"What is the term for drug action during pregnancy leading to inherited abnormalities?",o:["Mutagenic","Cancerogenic","Teratogenic","Embryotoxic","Fetotoxic"],a:2},
+{q:"What does 'pharmacodynamics' include?",o:["Absorption of drugs","Metabolism of drugs","Drug distribution","Drug excretion","Mechanisms of primary pharmacological reactions"],a:4},
+{q:"Increasing of action of one drug under the influence of another is called:",o:["Antagonism","Idiosyncrasy","Cumulation","Synergism","Tolerance"],a:3},
+{q:"Tachyphylaxis means:",o:["Cumulation of drug in the body","Strengthening of drug action during concomitant use","Weakening of drug action during concomitant use","Quick weakening of drug effect under repeated administration","Drug dependence"],a:3},
+{q:"Most drug receptors are:",o:["Small molecules with weight 100-1000 dalton","Lipids in the bilipid layer","Proteins in cell membranes and cytosol","DNA","RNA"],a:2},
+{q:"As second messengers all the following can serve EXCEPT:",o:["cAMP","Inositol-1,4,5-triphosphate","cGMP","Prostaglandin PGE2","Calcium ions"],a:3},
+{q:"Amount of drug for a single intake is called:",o:["Course dose","Single dose","Daily dose","Toxic dose","Lethal dose"],a:1},
+{q:"Drug used for treatment of acute poisoning with M-cholinomimetics:",o:["Atropine","Dipiroxim","Unithiol","Physostigmine","Niketamide"],a:0},
+{q:"Drug used for treatment of glycoside intoxication:",o:["Neostigmine","Potassium chloride","Naloxone","Bemegride","Vikasol"],a:1},
+{q:"Antagonist to opioid analgesics:",o:["Neostigmine","Unithiol","Niketamide","Oxycobolamine","Naloxone"],a:4},
+{q:"Disulfiram is used for treatment of:",o:["Acute opioid poisoning","Chronic opioid poisoning","Chronic mercury intoxication","Acute alcohol poisoning","Chronic alcohol abuse"],a:4},
+{q:"During overdosing of indirect anticoagulants, the following should be administered:",o:["Protamine","Sodium citrate","Sodium thiosulphate","Menadione","Cholinesterase reactivators"],a:3},
+{q:"Specific antagonist to heparin:",o:["Protamine","Sodium citrate","Sodium thiosulphate","Menadione","Nalorphine"],a:0},
+{q:"To decrease absorption of local anesthetics, their solutions are supplemented with:",o:["Atropine","Isoprenaline","Epinephrine","Glucose","Sodium chloride"],a:2},
+{q:"Which diuretic is used for forced diuresis during acute medicine poisoning?",o:["Acetazolamide","Dichlothiazide","Furosemide","Spironolactone","Triamterene"],a:2},
+{q:"Which group increases mental and physical performance and is used in pathological sleepiness?",o:["Tranquilizers","Neuroleptics","Antidepressants","Psychostimulators","Lithium preparations"],a:3},
+{q:"Indicate a nootropic preparation:",o:["Caffeine","Bemegride","Sodium oxybutyrate","Acetaminophen","Piracetam"],a:4},
+{q:"Caffeine possesses:",o:["Hypnotic action","Psychostimulative action","Suppression of mania","Suppression of hallucinations","Anesthetic action"],a:1},
+{q:"Preparation used for treatment of mental function compromised by circulatory insufficiency:",o:["Chlorpromazine","Diazepam","Phenobarbital","Piracetam","Caffeine"],a:3},
+{q:"Which preparation could cause sleeplessness?",o:["Phenobarbital","Phenazepam","Chlorpromazine","Nialamide","Lithium carbonas"],a:3},
+{q:"Mechanism of mesocarb (sidnocarb) action:",o:["Blocking of cholinoreceptors","Increase of epinephrine and dopamine delivery from nerve endings","MAO inhibition","Stimulation of cholinoreceptors","Stimulation of GABAB-receptors"],a:1},
+{q:"Mechanism of piracetam action:",o:["Blocking of cholinoreceptors","Increase of epinephrine and dopamine delivery from nerve endings","MAO inhibition","Stimulation of cholinoreceptors","Stimulation of GABAB-receptors"],a:4},
+{q:"Mechanism of pyrazidole action:",o:["Blocking of cholinoreceptors","Increase of epinephrine and dopamine delivery from nerve endings","MAO inhibition","Stimulation of cholinoreceptors","Stimulation of GABAB-receptors"],a:2},
+{q:"Main pharmacological effect of imipramine (imisine):",o:["Antidepressant","Sedative","Psychostimulant","Anxiolytic","Hypotensive"],a:0},
+{q:"Main pharmacological effect for mesocarb (sidnocarb):",o:["Antidepressant","Sedative","Psychostimulant","Anxiolytic","Hypotensive"],a:2},
+{q:"As a psychostimulant the following preparation is used:",o:["Glibenclamide","Caffeine","Lithium carbonas","Imipramine","Sodium bromide"],a:1},
+{q:"The following preparation belongs to tricyclic antidepressants:",o:["Amitriptyline","Fluoxetine","Pyrazidole","Nialamide","Lithium oxybutyrate"],a:0},
+{q:"The following belongs to irreversible MAO inhibitors:",o:["Amitriptyline","Fluoxetine","Pyrazidole","Nialamide","Lithium oxybutyrate"],a:3},
+{q:"The following belongs to reversible MAO inhibitors:",o:["Amitriptyline","Maprotiline","Nialamide","Lithium oxybutyrate","Moclobemide"],a:4},
+{q:"To antidepressants selectively inhibiting serotonin re-uptake, the following belongs:",o:["Amitriptyline","Metralindol","Fluoxetine","Nialamide","Lithium oxybutyrate"],a:2},
+{q:"MAO inhibitors are contraindicated in all situations EXCEPT:",o:["Concomitant use with indirect sympathomimetics like ephedrine","Concomitant use of tricyclic antidepressants","Consumption of beer and cheese","Use of aspirin","Treatment with dopamine"],a:3},
+{q:"Symptoms of imipramine overdosage include all EXCEPT:",o:["Pupil narrowing (miosis)","Hypotension","Shock and coma","Warm dry skin","Tachycardia"],a:0},
+{q:"Identify a neuroleptic:",o:["Nitrazepam","Phenobarbital","Trihexyphenidine","Chlorpromazine","Caffeine"],a:3},
+{q:"Chlorpromazine mechanism of action:",o:["Stimulation of alpha-adrenoreceptors","Stimulation of M-cholinoreceptors","Stimulation of dopamine receptors","Blocking of dopamine receptors","Blocking of serotonin receptors"],a:3},
+{q:"Main effect of chlorpromazine:",o:["Suppression of depression","Suppression of hallucinations","Stimulation of brain centers","Increase of movement activity","Increase in skeletal muscle tonus"],a:1},
+{q:"Main indication for lithium salts:",o:["Intensive traumatic pain","Parkinsonism","Neurosis","Maniacal conditions","Depression"],a:3},
+{q:"Preparation for correction of extrapyramidal symptoms caused by neuroleptics:",o:["Trihexyphenidine","Nalorphine","Metoclopramide","Norepinephrine","Dichlothiazide"],a:0},
+{q:"Neuroleptic derivative of butyrophenone:",o:["Chlorpromazine","Levomepromazine","Chlorprotixene","Haloperidol","Chlordiazepoxide"],a:3},
+{q:"Neuroleptic derivative of thioxanthene:",o:["Chlorpromazine","Levomepromazine","Chlorprotixene","Haloperidol","Chlordiazepoxide"],a:2},
+{q:"Which neuroleptic causes extrapyramidal problems most frequently?",o:["Clozapine","Sulpiride","Chlorprotixene","Haloperidol","Nalorphine"],a:3},
+{q:"Side effects of chlorpromazine include:",o:["Catalepsy","Hypotensive action","Parkinsonism","Stupor","All of the above"],a:4},
+{q:"Which preparation activates benzodiazepine receptors?",o:["Phenazepam","Caffeine","Mesocarb","Piracetam","Vinpocetine"],a:0},
+{q:"Mechanism of morphine action:",o:["Stimulation of opiate receptors","Stimulation of GABA receptors","Stimulation of benzodiazepine receptors","Stimulation of histamine receptors","Blocking of opiate receptors"],a:0},
+{q:"Drug used for neuroleptanalgesia:",o:["Morphine","Fentanyl","Chlorpromazine","Metamizole","Acetaminophen"],a:1},
+{q:"Opiate receptor antagonist effective for 2 days after oral intake:",o:["Naltrexone","Naloxone","Fentanyl","Methadone","Tramadol"],a:0},
+{q:"Which preparation listed belongs to tranquilizers?",o:["Sodium oxybutyrate","Chloral hydrate","Fluphenazine","Phenazepam","Nialamide"],a:3},
+{q:"The following drug has no after-effect (hangover):",o:["Nitrazepam","Pentobarbital","Phenobarbital","Diazepam","Triazolam"],a:4},
+{q:"Which anxiolytic does NOT affect benzodiazepine receptors?",o:["Diazepam","Alprazolam","Triazolam","Medazepam","Buspirone"],a:4},
+{q:"Specific antidote for benzodiazepine poisoning:",o:["Unithiol","Flumazenil","Naloxone","Bemegride","Caffeine"],a:1},
+{q:"Drug for non-inhalational anesthesia with very short duration of action:",o:["Propanidide","Thiopental sodium","Hexobarbital sodium","Sodium oxybutyrate","Ketamine"],a:0},
+{q:"Most unfavorable side effect from halothane anesthesia:",o:["Irritating action","Pronounced excitation phase","Cardiac arrhythmias","Long recovery","Hypersalivation"],a:2},
+{q:"Preparation with weakest narcotic activity:",o:["Halothane","Nitrous oxide","Ether","Isoflurane","Propanidide"],a:1},
+{q:"Least toxic drug for general anesthesia:",o:["Halothane","Ether","Naloxone","Nitrous oxide","All above"],a:3},
+{q:"Preparation used for treatment of epileptic status:",o:["Phenobarbital","Phenytoin","Diazepam","Trimethadione","Beclamide"],a:2},
+{q:"Indicate an antiparkinsonian drug:",o:["Chlorpromazine","Chlorprotixene","Droperidol","Trihexyphenidyl","Tubocurarine"],a:3},
+{q:"Antiparkinsonian drug affecting dopamine processes in CNS:",o:["Atropine","Trihexyphenidine","Scopolamine","Levodopa","Chlorpromazine"],a:3},
+{q:"Which preparation listed belongs to hypotensive drugs?",o:["Phenylephrine","Naphazoline","Clonidine","Niketamide","Strophanthin"],a:2},
+{q:"Main nitroglycerin effect:",o:["Decrease in myocardial oxygen consumption","Increase in myocardial oxygen consumption","Positive inotropic action","Elevation of blood pressure","Decrease of heart rate"],a:0},
+{q:"Main indication for nitroglycerin:",o:["Coronary insufficiency","Collapse","Paroxysmal tachycardia","Pheochromocytoma","Peptic ulcer"],a:0},
+{q:"Which vasodilator belongs to alpha-adrenoblockers?",o:["Hexamethonium","Sodium nitroprusside","Nicotinic acid","Hydralazine","Phentolamine"],a:4},
+{q:"Hypotensive drug from the group of ganglionic blockers:",o:["Methyldopa","Trimetaphan","Reserpine","Prazosin","Hydralazine"],a:1},
+{q:"Which hypotensive preparation belongs to beta-blockers?",o:["Clonidine","Hexamethonium","Guanethidine","Propranolol","Prazosin"],a:3},
+{q:"Hypotensive drug that is an ACE inhibitor:",o:["Captopril","Propranolol","Dichlothiazide","Hydralazine","Hexamethonium"],a:0},
+{q:"Mechanism of antianginal action of nifedipine:",o:["Blocking of Ca channels, dilation of coronary vessels, decrease in heart work","Blocking of adenosine deaminase, dilation of coronary vessels","Blocking of beta-adrenoreceptors","Stimulation of NO-receptors, dilation of coronary vessels, decrease in heart work","Excitation of receptors in mouth and dilation of coronary vessels"],a:0},
+{q:"Mechanism of antianginal action of validol:",o:["Blocking of Ca channels, dilation of coronary vessels, decrease in heart work","Blocking of adenosine deaminase, dilation of coronary vessels","Blocking of beta-adrenoreceptors","Stimulation of NO-receptors, dilation of coronary vessels, decrease in heart work","Excitation of receptors in mouth and dilation of coronary vessels"],a:4},
+{q:"Mechanism of antianginal action of nitroglycerin:",o:["Blocking of Ca channels, dilation of coronary vessels, decrease in heart work","Blocking of adenosine deaminase, dilation of coronary vessels","Blocking of beta-adrenoreceptors","Stimulation of NO-receptors, dilation of coronary vessels, decrease in heart work","Excitation of receptors in mouth and dilation of coronary vessels"],a:3},
+{q:"Mechanism of antianginal action of propranolol:",o:["Blocking of Ca channels, dilation of coronary vessels","Blocking of adenosine deaminase, dilation of coronary vessels","Blocking of beta-adrenoreceptors","Stimulation of NO-receptors, dilation of coronary vessels","Excitation of receptors in mouth and dilation of coronary vessels"],a:2},
+{q:"Captopril and enalapril can cause all effects listed EXCEPT:",o:["Increase in renin concentration","Inhibition of angiotensin-converting enzyme","Blocking of angiotensin 2 receptors","Increase in concentration of angiotensin 1","Increase sodium and decrease potassium in urine"],a:2},
+{q:"Hypotensive drug with short duration for treatment of hypertensive emergencies:",o:["Enalapril","Diazoxide","Sodium nitroprusside","Hydralazine","Minoxidil"],a:2},
+{q:"Antianginal effect of propranolol can be caused by everything EXCEPT:",o:["Decrease in heart rate in response to workload","Decrease in heart rate at rest","Decrease in the strength of heart contractions","Increase in end-diastolic volume","Decrease of systolic myocardial stress"],a:3},
+{q:"Antianginal drug belonging to calcium channel blockers:",o:["Nitroglycerin","Diltiazem","Propranolol","Amiodarone","Molsidomin"],a:1},
+{q:"Drug selectively blocking beta1-adrenoreceptors:",o:["Epinephrine","Phentolamine","Metoprolol","Hexamethonium","Cititon"],a:2},
+{q:"Which drug listed belongs to antiarrhythmics?",o:["Sodium nitroprusside","Quinidine","Ferrous lactate","Ergometrine","Papaverine"],a:1},
+{q:"What is the effect of quinidine?",o:["Antiarrhythmic","Antianginal","Cardiotonic","Analgesic","Hypertensive"],a:0},
+{q:"Antiarrhythmic preparation from the group of local anesthetics:",o:["Quinidine","Difenine","Lidocaine","Amiodarone","Verapamil"],a:2},
+{q:"Which antiarrhythmic belongs to calcium channel blockers?",o:["Quinidine","Lidocaine","Propranolol","Amiodarone","Verapamil"],a:4},
+{q:"All notions about antiarrhythmics are correct EXCEPT:",o:["Quinidine blocks sodium channels","Amiodarone blocks potassium channels","Propranolol blocks beta-adrenoreceptors","Lidocaine blocks potassium channels","Verapamil blocks calcium channels"],a:3},
+{q:"Which notion about lidocaine is wrong?",o:["Lidocaine should be administered parenterally","Lidocaine is used mainly for supraventricular arrhythmias","Procainamide causes lupus syndrome","Quinidine is effective orally","All antiarrhythmics can suppress cardiac contractility"],a:1},
+{q:"Which notion about antiarrhythmic mechanisms is wrong?",o:["Quinidine increases repolarization time and ERP","Lidocaine speeds repolarization and shortens ERP","Propranolol shortens phase 4 of action potential","Verapamil shortens duration of action potential","Amiodarone increases the time of repolarization"],a:2},
+{q:"Antiarrhythmic belonging to first class (sodium channel blockers):",o:["Propranolol","Amiodarone","Sotalol","Flecainide","Verapamil"],a:3},
+{q:"To which group of antiarrhythmics does propranolol belong?",o:["Membrane-stabilizing drugs","Drug prolonging effective refractory period","Beta-adrenoblockers","Drug blocking calcium channels","M-cholinoblocker"],a:2},
+{q:"All drugs can be used for long-term oral administration in arrhythmias EXCEPT:",o:["Esmolol","Propranolol","Amiodarone","Verapamil","Flecainide"],a:0},
+{q:"Lidocaine as an antiarrhythmic:",o:["Suppresses automatism of ectopic sources","Decreases rest potential","Prolongs duration of action potential","Prolongs PQ interval","Increases contractility"],a:0},
+{q:"Antiarrhythmic with longest duration of action:",o:["Amiodarone","Esmolol","Midocalm","Procainamide","Verapamil"],a:0},
+{q:"Indicate a cardiac glycoside:",o:["Epinephrine","Quinidine","Caffeine","Strophanthin","Niketamide"],a:3},
+{q:"Main effect of digitoxin:",o:["Antianginal","Cardiotonic","Hypotensive","Hypertensive","Analgesic"],a:1},
+{q:"Cardiac glycoside with marked property for material cumulation:",o:["Digitoxin","Digoxin","Strophanthin","Quinidine","Galantamine"],a:0},
+{q:"Drugs which will increase toxicity of cardiac glycosides:",o:["Potassium","Calcium-binding preparations","Saluretics","Unithiol","Potassium-sparing diuretics"],a:2},
+{q:"In acute pulmonary edema with myocardial infarction, all drugs can be used EXCEPT:",o:["Sodium nitroprusside","Digoxin","Furosemide","Propranolol","Dobutamine"],a:3},
+{q:"Non-glycoside cardiotonic inhibiting phosphodiesterase:",o:["Digitoxin","Corglycon","Amrinone","Lantoside","Strophanthin"],a:2},
+{q:"Main indication for cardiac glycosides:",o:["Arterial hypertension","Heart failure","Collapse","Angina","AV-blockage"],a:1},
+{q:"To diuretics belongs:",o:["Dehydrocholic acid","Etacrynic acid","Atropine","Papaverine","Adiurecrine"],a:1},
+{q:"Main effect of furosemide:",o:["Increase of vessel tonus","Increase of uterus tonus","Increase of diuresis","Increase of blood pressure","Increase of intraocular pressure"],a:2},
+{q:"Diuretic — aldosterone antagonist:",o:["Furosemide","Dichlothiazide","Etacrynic acid","Mannitol","Spironolactone"],a:4},
+{q:"Diuretic with the most powerful, quick, and short action:",o:["Chlorthalidone","Trimetaphan","Dichlothiazide","Furosemide","Spironolactone"],a:3},
+{q:"Mechanism of spironolactone action:",o:["Inhibition of carboanhydrase","Blocking of aldosterone receptors","Blocking of vasopressin receptors","Increase in osmotic pressure of primary urine","Increase in glomerular filtration"],a:1},
+{q:"Mechanism of mannitol action:",o:["Inhibition of carboanhydrase","Blocking of aldosterone receptors","Blocking of vasopressin receptors","Increase in osmotic pressure of primary urine","Increase in osmotic pressure in tubular lumen"],a:4},
+{q:"Loop diuretics most often cause:",o:["Decrease in heart rate","Lowering of circulation volume","Increase of potassium in blood","Metabolic acidosis","Increase of sodium in blood"],a:1},
+{q:"Main localization of furosemide action:",o:["Thick ascending limb of Henle loop","Proximal tubules","Distal tubules","Collecting ducts","Glomerules"],a:0},
+{q:"Usage of which diuretic can cause hypokalemia?",o:["Dichlothiazide","Mannitol","Spironolactone","Triamterene","Urea"],a:0},
+{q:"Drug decreasing reabsorption of Na+, K+, Cl-, Mg2+, Ca2+:",o:["Mannitol","Furosemide","Dichlothiazide","Triamterene","Spironolactone"],a:1},
+{q:"Diuretic which provokes uric acid retention:",o:["Mannitol","Spironolactone","Etacrynic acid","Triamterene","Dichlothiazide"],a:4},
+{q:"Diuretic with long duration of action:",o:["Mannitol","Furosemide","Dichlothiazide","Triamterene","Clopamide"],a:4},
+{q:"Preparation least dangerous in patients with hyperkalemia:",o:["Captopril","Enalapril","Hydrochlorothiazide","Spironolactone","Triamterene"],a:2},
+{q:"Bronchodilator for bronchial asthma belonging to myotropic broncholytics:",o:["Isoprenaline","Salbutamol","Ephedrine","Aminophylline (theophylline)","Atropine"],a:3},
+{q:"Main pharmacological effect of salbutamol:",o:["Anticough","Expectorant","Local anesthesia","Broncholytic","Stimulation of respiration"],a:3},
+{q:"Anticough preparation of central action without drug dependence potential:",o:["Glaucine hydrochloride","Prenoxidiazine (libexine)","Bromhexine","Ambroxol","Cititon"],a:0},
+{q:"Mechanism of anticough action of codeine:",o:["Inhibition of cough center","Inhibition of cough reflex by decreasing nerve ending sensitivity","Reflector increase in secretion of bronchial glands","Mucolytic action","Increase in secretion of bronchial glands"],a:0},
+{q:"Adrenomimetic for treatment of bronchial asthma attack:",o:["Atropine","Theophylline","Ipratropium bromide","Salbutamol","Phenylephrine"],a:3},
+{q:"Preparation for asthmatic status (parenteral) with phospholipase A2 inhibition as main mechanism:",o:["Theophylline","Ipratropium bromide","Prednisolone","Epinephrine","Cromoglycic acid"],a:2},
+{q:"Bronchodilator for COPD almost free from proarrhythmic effect:",o:["Theophylline","Isoproterenol","Epinephrine","Ephedrine","Ipratropium"],a:4},
+{q:"Laxative used during acute poisoning:",o:["Senna anthraquinone glycosides","Rhubarb","Buckthorn","Magnesium sulphate","Vaseline oil"],a:3},
+{q:"Drug neutralizing gastric hydrochloric acid (antacid):",o:["Atropine","Pirenzepine","Aluminium hydroxide","Cimetidine","Hexamethonium"],a:2},
+{q:"Main effect of cimetidine:",o:["Increase in gastric HCl secretion","Decrease in gastric HCl secretion","Decrease in vascular tone","Suppression of myometrium contractions","Increase in heart rate"],a:1},
+{q:"Which preparation has ulcerogenic action?",o:["Sulfadimidine","Acetylsalicylic acid","Phenazepam","Digitoxin","Atropine"],a:1},
+{q:"Drug which inhibits secretion of hydrogen ions by parietal cells of the stomach:",o:["Histamine","Omeprazole","Pentagastrine","Magnesium sulphate","Dehydrocholic acid"],a:1},
+{q:"Gastrocytoprotector used in treatment of gastric ulcer:",o:["Histamine","Sucralfate","Bromhexine","Atropine","Sodium hydrocarbonate"],a:1},
+{q:"Preparation improving gastrointestinal motility:",o:["Atropine","Papaverine","Almagel","Metoclopramide","Pentagastrine"],a:3},
+{q:"Antihistamine preparation with hypnotic action:",o:["Cimetidine","Ranitidine","Diphenhydramine","Mebhydroline","Histaglobulin"],a:2},
+{q:"Which antihistamine does NOT have sedative action?",o:["Diphenhydramine","Chloropyramine","Clemastine","Loratadine","None of them"],a:3},
+{q:"Myotropic bronchodilator used in anaphylactic shock:",o:["Aminophylline","Atropine","Salbutamol","Isoproterenol","Cromolyn sodium"],a:0},
+{q:"Drug for prevention of gout attacks by increasing uric acid excretion:",o:["Sulfinpyrazone","Allopurinol","Indomethacin","Colchicine","Diclofenac"],a:0},
+{q:"Drug suppressing production of uric acid:",o:["Indomethacin","Allopurinol","Diclofenac","Prednisolone","Piroxicam"],a:1},
+{q:"Drug used for treatment of acute gout attack:",o:["Diclofenac","Allopurinol","Levamisole","Cyclosporine A","Flucinolone acetonide"],a:0},
+{q:"Anti-inflammatory preparation with immunodepressive activity:",o:["Acetylsalicylic acid","Etacrynic acid","Desoxycorticosterone acetate","Hydrocortisone","Clomiphene"],a:3},
+{q:"Mechanism of chloramphenicol action:",o:["Suppression of folic acid synthesis","Suppression of murein synthesis","Suppression of protein synthesis by inhibition of peptide bond formation","Suppression of DNA synthesis","Disintegration of cell membrane"],a:2},
+{q:"Mechanism of antimicrobial action of streptomycin:",o:["Suppression of folic acid synthesis","Inhibition of transpeptidase","Inhibition of DNA-gyrase","Inhibition of protein synthesis","Inhibition of synthesis of mycolic acids"],a:3},
+{q:"Doxycycline belongs to the group of:",o:["Penicillins","Cephalosporins","Aminoglycosides","Macrolides","Tetracyclines"],a:4},
+{q:"Penicillin-resistant staphylococci are sensitive to:",o:["Cephaloridine","Streptomycin","Tetracycline","Erythromycin","All listed above"],a:4},
+{q:"Resistance of some microbes to chloramphenicol is related to:",o:["Secretion of beta-lactamases","Changes in cell wall permeability","Synthesis of enzymes acetylating the drug","Alterations in drug target","Changes in metabolic ways inhibited by drug"],a:2},
+{q:"Resistance of microbes to erythromycin is related to:",o:["Secretion of beta-lactamases","Changes in cell wall permeability","Synthesis of enzymes acetylating the drug","Alterations in drug target","Changes in metabolic ways inhibited by drug"],a:3},
+{q:"Mechanism of action for tetracycline:",o:["Suppression of folic acid synthesis","Inhibition of murein synthesis","Inhibition of nucleic acids synthesis","Inhibition of protein synthesis by prevention of tRNA-ribosome complex formation","Inhibition of protein synthesis by blocking of translocase"],a:3},
+{q:"Antibiotic with widest spectrum of action:",o:["Penicillin","Oxacillin","Polymyxin","Meropenem","Erythromycin"],a:3},
+{q:"Azithromycin belongs to the group:",o:["Penicillins","Macrolides","Tetracyclines","Aminoglycosides","Carbapenems"],a:1},
+{q:"Drug for treatment of chlamydial infection:",o:["Penicillin","Azithromycin","Phenoxymethylpenicillin","Streptomycin","Polymyxin"],a:1},
+{q:"Resistance of some microbes to tetracyclines is related to:",o:["Secretion of beta-lactamases","Changes in cell wall permeability","Synthesis of enzymes acetylating the drug","Alterations in drug target","Changes in metabolic ways inhibited by drug"],a:1},
+{q:"Long-acting preparation from the tetracyclines group:",o:["Ampicillin","Cephaloridine","Doxycycline","Rifampicin","Erythromycin"],a:2},
+{q:"Aminoglycoside used for decontamination of intestine before surgical interventions:",o:["Erythromycin","Neomycin","Griseofulvin","Metacycline","Oxacillin"],a:1},
+{q:"Antibiotic from the penicillin group:",o:["Neomycin","Doxycycline","Erythromycin","Cephaloridine","Ampicillin"],a:4},
+{q:"Semisynthetic penicillin with wide spectrum of action:",o:["Penicillin","Bicillin","Oxacillin","Ampicillin","Doxycycline"],a:3},
+{q:"Semisynthetic penicillin resistant to action of beta-lactamases:",o:["Penicillin","Bicillin","Oxacillin","Ampicillin","Procainpenicillin"],a:2},
+{q:"Mechanism of antimicrobial action of polymyxins:",o:["Inhibition of folic acid synthesis","Inhibition of murein synthesis","Inhibition of protein synthesis by ribosomes","Change of cell membrane permeability","Change of DNA function"],a:3},
+{q:"Everything about imipenem is right EXCEPT:",o:["It has wide spectrum of action","Its renal elimination is not inhibited by probenecide","There is no cross-allergy between imipenem and penicillins","In renal insufficiency the dose should be lowered","It is active against methicillin-resistant staphylococci"],a:4},
+{q:"All notions about vancomycin are correct EXCEPT:",o:["Vancomycin inhibits synthesis of precursors for structural components of cell wall","Doses of vancomycin should be increased in patients with renal failure","Quick infusion of vancomycin can cause red-men syndrome","Toxic effects can appear if dose is not lowered in renal failure","Vancomycin can be used for severe infections with resistant S. aureus"],a:1},
+{q:"Mechanism of sulfadimidine action:",o:["Inhibition of folic acid formation by microbial cells","Inhibition of folate reductase","Inhibition of transpeptidase","Inhibition of DNA-dependent RNA-polymerase","Violation of right reading of genetic code"],a:0},
+{q:"Sulfonamide with low absorption from GIT:",o:["Sulfadimidine","Sulfapyridazine","Sulfacarbamide","Phthalylsulfathiazole","Co-trimoxazole"],a:3},
+{q:"Most frequent side effects of sulfonamides:",o:["Blurred vision","Psychosis","Paralysis","Hypersensitivity reactions","Vestibular disturbances"],a:3},
+{q:"Drug diminishing the effect of sulfonamides:",o:["Benzylpenicillin","Trimethoprim","Procaine","Rifampicin","Methotrexate"],a:2},
+{q:"Sulfonamide preparation used as eye drops:",o:["Sulfadimidine","Sulfapyridazine","Phthalylsulfathiazole","Sulfacetamide sodium","Co-trimoxazole"],a:3},
+{q:"Nitroxoline belongs to the derivatives of:",o:["Naphthyridine","Fluoroquinolone","8-oxyquinoline","Nitrofuran","Nitroimidazole"],a:2},
+{q:"Furazolidone belongs to the derivatives of:",o:["Naphthyridine","Fluoroquinolone","8-oxyquinoline","Nitrofuran","Nitroimidazole"],a:3},
+{q:"All notions about sulfonamides are correct EXCEPT:",o:["Sulfonamides inhibit bacterial dihydropteroate synthase (NOT folate reductase)","During late pregnancy they can cause problems with basal ganglia","Cross-allergy with thiazide diuretics is possible","Crystalluria is more probable at low pH of urine","Sulfonamides are antimetabolites for PABA"],a:0},
+{q:"What is typical for enteral drug administration?",o:["Quick development of effect","Can be given to unconscious patients","Can use drugs destroyed in the stomach","Rate of drug entrance to the circulation is unstable","Necessity for sterile character of drugs"],a:3},
+{q:"Main mechanism of drug absorption in the stomach:",o:["Facilitated diffusion","Passive diffusion","Active transport","Pinocytosis","Filtration"],a:1},
+{q:"Increase in microsomal enzyme activity usually leads to:",o:["Speeding of drug inactivation","Slowing of drug inactivation","Increased toxicity","Increase of main pharmacological effect","Increase of side effects frequency"],a:0},
+{q:"What does bioavailability characterize?",o:["Completeness and rate of absorption","Character of distribution","Intensity of metabolization","Rate of elimination","Binding to plasma proteins"],a:0},
+{q:"What is typical for sublingual administration?",o:["Slow development of effect","Can administer irritating substances","Necessity to sterilize the drug","Drug enters circulation without hepatic metabolization","Can be administered to unconscious patient"],a:3},
+{q:"Which phenomenon can take place under repeated drug administration?",o:["Tolerance","Idiosyncrasy","Summation","Potentiation","Synergism"],a:0},
+{q:"Which example represents pharmacodynamic drug interaction?",o:["Papaverine and cardiac glycosides form crystals in same syringe","Furosemide shortens and weakens the action of many drugs by facilitating excretion","Ferrous sulfate forms insoluble complexes with tetracyclines","Phenobarbital weakens neodicoumarol action by inducing microsomal enzymes","Atropine alleviates pilocarpine influence on smooth muscles by blocking M-cholinoreceptors"],a:4},
+{q:"Weakening of action of one drug under the influence of another is called:",o:["Antagonism","Idiosyncrasy","Cumulation","Synergism","Tolerance"],a:0},
+{q:"Which genetic enzymopathy can lead to hemolytic jaundice under action of highly oxidative drugs?",o:["Glucose-6-phosphate dehydrogenase deficiency","Deficiency of methemoglobin reductase","Deficiency of UDP-glucuronyl transferase","Deficiency of N-acetyltransferase","Pseudocholinesterase deficiency"],a:0},
+{q:"During poisoning with phosphoorganic cholinesterase inhibitors the following drugs are used:",o:["Unithiol","Nalorphine","Vikasol","Cititon","Atropine with cholinesterase reactivators"],a:4},
+{q:"Indicate an antidepressant:",o:["Thiopental sodium","Phenobarbital","Levodopa","Carbidopa","Fluoxetine"],a:4},
+{q:"Mechanism of action for nialamide:",o:["Cholinesterase inhibitor","Monoaminooxidase (MAO) inhibitor","COMT inhibitor","Adenylate cyclase inhibitor","Phospholipase inhibitor"],a:1},
+{q:"For the treatment of depression the following preparation is used:",o:["Glibenclamide","Caffeine","Lithium carbonas","Imipramine (imizine)","Sodium bromide"],a:3},
+{q:"What are the side effects of morphine?",o:["Miosis","Constipation","Euphoria","Dependence","All of the above"],a:4},
+{q:"During morphine poisoning the most effective preparation is:",o:["Pentazocine","Nalorphine","Naloxone","Bemegride","Niketamide"],a:2},
+{q:"Mechanism of diazepam action:",o:["Activation of adrenoreceptors","Blocking of adrenoreceptors","Binding to benzodiazepine receptors and stimulation of GABA receptor complex","Activation of histamine receptors","Activation of serotonin receptors"],a:2},
+{q:"Which drug listed belongs to general anesthetics?",o:["Nitrazepam","Halothane","Phenobarbital","Phenytoin","Bemegride"],a:1},
+{q:"Mechanism of levodopa action:",o:["Increase in GABA content in CNS","Increase in enkephalin content in CNS","Increase in dopamine content in CNS","Increase in serotonin content in CNS","Increase in acetylcholine content in CNS"],a:2},
+{q:"Which antiparkinsonian preparation can cause gingival hyperplasia?",o:["Phenobarbital","Carbamazepine","Phenytoin","Diazepam","None of them"],a:2},
+{q:"Which preparation listed belongs to antianginal drugs?",o:["Strophanthin","Quinidine","Caffeine","Nitroglycerin","Niketamide (cordiamin)"],a:3},
+{q:"Mechanism of captopril action:",o:["Blocking of alpha-adrenoreceptors","Blocking of beta-adrenoreceptors","Blocking of N-cholinoreceptors","Increase in NO formation","Inhibition of angiotensin-converting enzyme"],a:4},
+{q:"Which drug for prevention of angina attack belongs to beta-blockers?",o:["Sustac","Nitrong","Metoprolol","Dipyridamole","Nifedipine"],a:2},
+{q:"Mechanism of antianginal action of verapamil:",o:["Blocking of Ca channels, dilation of coronary vessels, decrease in heart work","Blocking of adenosine deaminase, dilation of coronary vessels","Blocking of beta-adrenoreceptors","Stimulation of NO-receptors, dilation of coronary vessels, decrease in heart work","Excitation of receptors in mouth and dilation of coronary vessels"],a:0},
+{q:"Drug alleviating atrio-ventricular block:",o:["Strophanthin","Propranolol","Atropine","Verapamil","Amiodarone"],a:2},
+{q:"Local anesthetic with marked antiarrhythmic effect used for prophylaxis of ventricular tachycardia:",o:["Dicaine","Lidocaine","Ultracaine","Benzocaine","Procaine"],a:1},
+{q:"Indicate a cardiac glycoside:",o:["Epinephrine","Quinidine","Caffeine","Digoxin","Niketamide"],a:3},
+{q:"Cardiac glycoside with short latent period of action:",o:["Digitoxin","Digoxin","Strophanthin","Quinidine","Galantamine"],a:2},
+{q:"Mechanism of hydrochlorothiazide action:",o:["Inhibition of carboanhydrase","Blocking of aldosterone receptors","Blocking of vasopressin receptors","Inhibition of Na+ and Cl- reabsorption in distal segment","Increase in glomerular filtration"],a:3},
+{q:"Potassium-sparing diuretic which does NOT affect aldosterone action:",o:["Furosemide","Dichlothiazide","Mannitol","Triamterene","Spironolactone"],a:3},
+{q:"Preparation used for bronchial asthma but without bronchodilator action:",o:["Metoprolol","Isoproterenol","Ephedrine","Salmeterol","Cromolyn (cromoglycic acid)"],a:4},
+{q:"Drug blocking M-cholinoreceptors of bronchi:",o:["Epinephrine","Ipratropium bromide","Theophylline","Aminophylline","Salbutamol"],a:1},
+{q:"Indicate a laxative preparation:",o:["Trihexyphenidine","Neostigmine","Phenolphthalein","Reserpine","Guanethidine"],a:2},
+{q:"Antiemetic drug which blocks dopamine receptors in trigger zone of emetic center:",o:["Metoclopramide","Diphenhydramine","Scopolamine","Atropine","Promethazine"],a:0},
+{q:"Indicate an antiemetic drug:",o:["Ondansetron","Ranitidine","Pepsin","Almagel","Pancreatine"],a:0},
+{q:"Mechanism of action for acetylsalicylic acid:",o:["Inhibition of monoaminooxidase","Inhibition of cholinesterase","Inhibition of cyclooxygenase","Inhibition of phospholipase","Inhibition of phosphodiesterase"],a:2},
+{q:"Preparation used for basic therapy of rheumatoid arthritis:",o:["Methotrexate","Unithiol","Deferoxamine","Sodium edetate","Dimercaprol"],a:0},
+{q:"Selective inhibitor of cyclooxygenase type 2:",o:["Celecoxib","Indomethacin","Diclofenac","Butadione","Piroxicam"],a:0},
+{q:"Antibiotics that cause suppression of blood formation (anemia, leukopenia):",o:["Penicillins","Cephalosporins","Macrolides","Chloramphenicol","Tetracyclines"],a:3},
+{q:"Gentamicin belongs to the group of:",o:["Monobactams","Carbapenems","Aminoglycosides","Tetracyclines","8-oxyquinolines"],a:2},
+{q:"Microbial beta-lactamases are inhibited by:",o:["Penicillin","Benzathine benzylpenicillin","Phenoxymethylpenicillin","Ampicillin","Clavulanic acid"],a:4},
+{q:"Mechanism of action for ofloxacin:",o:["Inhibition of folic acid synthesis","Inhibition of transpeptidase","Inhibition of DNA-gyrase","Inhibition of protein synthesis","Inhibition of mycolic acids synthesis"],a:2},
+{q:"Nalidixic acid belongs to the group of:",o:["Naphthyridine","Fluoroquinolone","8-oxyquinoline","Nitrofuran","Nitroimidazole"],a:0},
+{q:"Ofloxacin belongs to the derivatives of:",o:["Monobactams","Quinolones","8-oxyquinolines","Nitrofurans","Nitroimidazoles"],a:1},
+{q:"Metronidazole belongs to the derivatives of:",o:["Naphthyridine","Fluoroquinolone","8-oxyquinoline","Nitrofuran","Nitroimidazole"],a:4},
+{q:"Reason for selective sulfonamide action on microbial cells:",o:["Property to suppress synthesis of steroids important for bacterial cells only","Absence of dihydrofolate reductase in bacterial cells","Differential sensitivity of bacterial and mammalian dihydrofolate reductase","Absence of dihydrofolate synthase in mammalian cells","Different structure of mammalian and bacterial ribosomes"],a:3},
+{q:"Sulfonamide containing trimethoprim:",o:["Sulfadimidine","Sulfapyridazine","Phthalylsulfathiazole","Sulfacetamide sodium","Co-trimoxazole"],a:4}
+];
+
+var L=['A','B','C','D','E'];
+var shuffleOn=true,reviewOn=false;
+var questions=[],idx=0,score=0,wrong=0,answered=false;
+var startTime=null,timerInt=null,elapsed=0;
+
+function ge(id){return document.getElementById(id);}
+function cls(id){return document.getElementById(id).className;}
+
+function shufl(a){
+  var arr=a.slice(),i=arr.length,j,t;
+  while(i--){j=Math.floor(Math.random()*(i+1));t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  return arr;
+}
+function fmt(s){var m=Math.floor(s/60),sc=s%60;return m+':'+(sc<10?'0':'')+sc;}
+
+function showScreen(id){
+  var ids=['sStart','sQuiz','sResult'],i;
+  for(i=0;i<ids.length;i++) ge(ids[i]).className='screen';
+  ge(id).className='screen active';
+}
+
+function addEv(id,fn){
+  var el=ge(id);
+  el.addEventListener('click',fn,false);
+  el.addEventListener('touchend',function(e){e.preventDefault();fn(e);},false);
+}
+
+addEv('btnShuffle',function(){
+  shuffleOn=!shuffleOn;
+  ge('btnShuffle').className='tog'+(shuffleOn?' on':'');
+});
+addEv('btnReview',function(){
+  reviewOn=!reviewOn;
+  ge('btnReview').className='tog'+(reviewOn?' on':'');
+});
+addEv('btnStart',startQuiz);
+addEv('btnNext',nextQ);
+addEv('btnTryAgain',startQuiz);
+addEv('btnNewSession',function(){showScreen('sStart');});
+
+function startQuiz(){
+  questions=shuffleOn?shufl(QS):QS.slice();
+  idx=0;score=0;wrong=0;answered=false;elapsed=0;
+  ge('qTot').textContent=questions.length;
+  showScreen('sQuiz');
+  if(timerInt)clearInterval(timerInt);
+  startTime=Date.now();
+  timerInt=setInterval(function(){
+    elapsed=Math.floor((Date.now()-startTime)/1000);
+    ge('timerEl').textContent=fmt(elapsed);
+  },1000);
+  renderQ();
+}
+
+function renderQ(){
+  var q=questions[idx];
+  answered=false;
+  ge('qNum').textContent=idx+1;
+  ge('qLabel').textContent='Question '+(idx+1);
+  ge('progFill').style.width=((idx/questions.length)*100)+'%';
+  ge('qText').textContent=q.q;
+
+  var list=ge('optsList');
+  list.innerHTML='';
+  var i;
+  for(i=0;i<q.o.length;i++){
+    (function(i){
+      var btn=document.createElement('button');
+      btn.type='button';
+      btn.className='opt';
+      var ltr=document.createElement('span');
+      ltr.className='opt-ltr';
+      ltr.textContent=L[i];
+      var txt=document.createElement('span');
+      txt.textContent=q.o[i];
+      btn.appendChild(ltr);
+      btn.appendChild(txt);
+      if(reviewOn){
+        btn.disabled=true;
+        if(i===q.a) btn.className='opt correct';
+      } else {
+        btn.addEventListener('click',function(){pick(i);},false);
+        btn.addEventListener('touchend',function(e){e.preventDefault();pick(i);},false);
+      }
+      list.appendChild(btn);
+    })(i);
+  }
+
+  ge('fbBar').className='fb';
+  ge('btnNext').className='btn-next';
+
+  if(reviewOn){
+    ge('btnNext').className='btn-next show';
+    ge('btnNext').textContent=idx>=questions.length-1?'See Results':'Next Question \u2192';
+    showFb(true,'Review mode \u2014 correct answer highlighted.');
+    answered=true;
+  }
+}
+
+function pick(chosen){
+  if(answered)return;
+  answered=true;
+  var q=questions[idx];
+  var c=q.a;
+  var btns=ge('optsList').querySelectorAll('.opt');
+  var i;
+  for(i=0;i<btns.length;i++) btns[i].disabled=true;
+  if(chosen===c){
+    btns[chosen].className='opt correct';
+    score++;
+    showFb(true,'Correct! Well done.');
+  } else {
+    btns[chosen].className='opt wrong';
+    btns[c].className='opt correct';
+    for(i=0;i<btns.length;i++){if(i!==chosen&&i!==c) btns[i].className='opt dim';}
+    wrong++;
+    showFb(false,'Incorrect. Correct: '+L[c]+'. '+q.o[c]);
+  }
+  var nb=ge('btnNext');
+  nb.className='btn-next show';
+  nb.textContent=idx>=questions.length-1?'See Results':'Next Question \u2192';
+}
+
+function showFb(ok,msg){
+  var fb=ge('fbBar');
+  fb.className='fb show '+(ok?'ok':'ko');
+  ge('fbIcon').textContent=ok?'\u2713':'\u2717';
+  ge('fbText').textContent=msg;
+}
+
+function nextQ(){
+  if(idx>=questions.length-1){showResults();return;}
+  idx++;
+  var c=ge('qContent');
+  c.className='qc out';
+  setTimeout(function(){c.className='qc';renderQ();},160);
+}
+
+function showResults(){
+  clearInterval(timerInt);
+  var tot=questions.length;
+  var pct=Math.round((score/tot)*100);
+  var circ=2*Math.PI*62;
+  var offset=circ-(pct/100)*circ;
+  setTimeout(function(){ge('ringPath').style.strokeDashoffset=offset;},100);
+  ge('resPct').textContent=pct+'%';
+  var grades=[
+    [90,'Outstanding! \uD83C\uDFC6','Exceptional pharmacology knowledge.'],
+    [75,'Great Work! \uD83C\uDFAF','Strong performance across topics.'],
+    [60,'Good Effort! \uD83D\uDCDA','Keep reviewing the tricky areas.'],
+    [40,'Keep Practicing! \uD83D\uDCAA','More sessions will improve your score.'],
+    [0,'Keep Going! \uD83D\uDD04','Review the material and try again.']
+  ];
+  var i;
+  for(i=0;i<grades.length;i++){
+    if(pct>=grades[i][0]){
+      ge('resTitle').textContent=grades[i][1];
+      ge('resSub').textContent=grades[i][2];
+      break;
+    }
+  }
+  ge('resC').textContent=score;
+  ge('resW').textContent=wrong;
+  ge('resT').textContent=fmt(elapsed);
+  showScreen('sResult');
+}
+
+ge('totalN').textContent=QS.length;
+</script>
+</body>
+</html>
