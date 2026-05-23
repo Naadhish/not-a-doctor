@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Pathological Anatomy &amp; General Medicine Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c14;--surface:#0e1420;--surface2:#141c2e;
+  --border:rgba(255,255,255,0.07);--accent:#00e5b0;--accent2:#0090ff;
+  --danger:#ff4d6d;--text:#e8edf5;--muted:#6b7a99;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'DM Sans',Helvetica,Arial,sans-serif;
+  min-height:100vh;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse at 20% 10%,rgba(0,144,255,.06) 0%,transparent 60%),
+    radial-gradient(ellipse at 80% 90%,rgba(0,229,176,.05) 0%,transparent 60%);
+}
+.wrapper{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px 16px;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom));
+}
+.screen{display:none;width:100%;max-width:720px;}
+.screen.active{
+  display:block;
+  animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes pop{0%,100%{transform:scale(1)}40%{transform:scale(1.015)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* START */
+.start-hero{text-align:center;padding:52px 20px 48px;}
+.pill{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,229,176,.08);border:1px solid rgba(0,229,176,.2);
+  color:var(--accent);font-size:11px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:6px 16px;border-radius:100px;margin-bottom:26px;
+}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);
+  animation:blink 2s infinite;display:inline-block;}
+h1{
+  font-family:'Syne',Helvetica,sans-serif;
+  font-size:clamp(1.9rem,7vw,3.3rem);
+  font-weight:800;line-height:1.05;letter-spacing:-.02em;margin-bottom:14px;
+  background:linear-gradient(135deg,#fff 30%,rgba(0,229,176,.8));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;color:#fff;
+}
+.start-p{color:var(--muted);font-size:.98rem;line-height:1.65;max-width:450px;margin:0 auto 34px;}
+.stats-row{
+  display:flex;justify-content:center;
+  gap:10px;margin-bottom:32px;flex-wrap:wrap;
+}
+.stat-chip{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:14px 20px;text-align:center;min-width:110px;
+}
+.stat-val{font-family:'Syne',Helvetica,sans-serif;font-size:1.7rem;font-weight:700;color:var(--accent);line-height:1;}
+.stat-lbl{font-size:.68rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:4px;}
+.tog-row{
+  display:flex;justify-content:center;
+  gap:10px;margin-bottom:28px;flex-wrap:wrap;
+}
+.tog{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--muted);font-family:'DM Sans',Helvetica,sans-serif;
+  font-size:.85rem;padding:11px 18px;border-radius:100px;
+  cursor:pointer;appearance:none;
+  min-height:44px;min-width:44px;
+  transition:background .2s,border-color .2s,color .2s;
+  font-weight:500;
+}
+.tog.on{background:rgba(0,229,176,.1);border-color:rgba(0,229,176,.35);color:var(--accent);}
+.btn-primary{
+  background:var(--accent);color:#000;
+  font-family:'Syne',Helvetica,sans-serif;font-weight:700;font-size:1rem;
+  letter-spacing:.03em;padding:16px 42px;border-radius:100px;
+  border:none;cursor:pointer;appearance:none;
+  min-height:54px;min-width:160px;
+  transition:transform .2s,box-shadow .2s;
+  display:inline-block;
+}
+.btn-primary:active{transform:scale(.97);}
+
+/* QUIZ */
+.quiz-hdr{
+  display:flex;align-items:center;
+  gap:12px;margin-bottom:18px;
+}
+.q-counter{font-family:'Syne',Helvetica,sans-serif;font-size:.8rem;font-weight:600;color:var(--muted);white-space:nowrap;}
+.q-counter strong{color:var(--text);}
+.prog-wrap{flex:1;height:4px;background:var(--surface2);border-radius:100px;overflow:hidden;}
+.prog-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  border-radius:100px;
+  transition:width .5s cubic-bezier(.22,1,.36,1);
+}
+.timer-chip{
+  display:flex;align-items:center;gap:6px;
+  font-family:'Syne',Helvetica,sans-serif;font-size:.8rem;font-weight:600;
+  color:var(--muted);white-space:nowrap;
+}
+.t-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--accent);
+  display:inline-block;animation:blink 1.5s infinite;
+}
+.q-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;padding:26px 22px;margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.q-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+}
+.q-num{font-family:'Syne',Helvetica,sans-serif;font-size:.7rem;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.q-text{font-size:1.02rem;line-height:1.65;color:var(--text);}
+.opts-list{
+  display:flex;flex-direction:column;gap:9px;
+}
+.opt{
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:14px;padding:13px 16px;
+  text-align:left;cursor:pointer;
+  display:flex;align-items:flex-start;gap:12px;
+  transition:border-color .18s,background .18s;
+  font-family:'DM Sans',Helvetica,sans-serif;
+  font-size:.9rem;line-height:1.5;color:var(--text);
+  width:100%;appearance:none;
+  min-height:50px;
+}
+.opt:hover:not(:disabled){border-color:rgba(0,229,176,.3);background:rgba(0,229,176,.04);}
+.opt-ltr{
+  flex-shrink:0;
+  width:26px;height:26px;border-radius:7px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',Helvetica,sans-serif;
+  font-size:.7rem;font-weight:700;color:var(--muted);
+  margin-top:1px;
+  transition:background .18s,border-color .18s,color .18s;
+}
+.opt:disabled{cursor:default;}
+.opt.correct{
+  border-color:rgba(0,229,176,.6);background:rgba(0,229,176,.08);
+  animation:pop .35s ease;
+}
+.opt.correct .opt-ltr{background:rgba(0,229,176,.2);border-color:var(--accent);color:var(--accent);}
+.opt.wrong{
+  border-color:rgba(255,77,109,.5);background:rgba(255,77,109,.06);
+  animation:shake .35s ease;
+}
+.opt.wrong .opt-ltr{background:rgba(255,77,109,.15);border-color:var(--danger);color:var(--danger);}
+.opt.dim{opacity:.3;}
+.fb{
+  border-radius:12px;padding:12px 16px;font-size:.87rem;font-weight:500;margin-bottom:12px;
+  display:none;align-items:flex-start;gap:10px;
+  animation:fadeUp .3s ease both;
+}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(0,229,176,.1);border:1px solid rgba(0,229,176,.25);color:var(--accent);}
+.fb.ko{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.25);color:#ff8fa3;}
+.fb-icon{font-weight:700;flex-shrink:0;font-style:normal;}
+.btn-next{
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  color:#000;font-family:'Syne',Helvetica,sans-serif;font-weight:700;
+  font-size:.87rem;letter-spacing:.04em;
+  padding:14px 30px;border-radius:100px;border:none;cursor:pointer;
+  display:none;float:right;margin-top:6px;
+  appearance:none;min-height:48px;
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-next.show{
+  display:inline-block;
+  animation:fadeUp .3s ease both;
+}
+.btn-next:active{transform:scale(.97);}
+.cf::after{content:'';display:table;clear:both;}
+.qc{transition:opacity .16s ease;}
+.qc.out{opacity:0;}
+
+/* RESULTS */
+.result-wrap{text-align:center;padding:12px 0;}
+.ring-box{position:relative;display:inline-block;margin-bottom:0;}
+.ring-box svg{display:block;}
+.pct-overlay{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.pct-n{font-family:'Syne',Helvetica,sans-serif;font-size:2.3rem;font-weight:800;line-height:1;color:var(--text);}
+.pct-s{font-size:.68rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:2px;}
+.res-title{font-family:'Syne',Helvetica,sans-serif;font-size:1.6rem;font-weight:700;margin:18px 0 6px;letter-spacing:-.01em;}
+.res-sub{color:var(--muted);font-size:.9rem;margin-bottom:28px;}
+.res-grid{
+  display:flex;gap:10px;margin-bottom:28px;
+  justify-content:center;
+}
+.res-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:18px 12px;text-align:center;
+  flex:1;min-width:90px;
+}
+.res-val{font-family:'Syne',Helvetica,sans-serif;font-size:1.8rem;font-weight:700;line-height:1;}
+.res-lbl{font-size:.65rem;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:5px;}
+.res-btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-secondary{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text);font-family:'Syne',Helvetica,sans-serif;font-weight:700;
+  font-size:.87rem;letter-spacing:.03em;
+  padding:14px 28px;border-radius:100px;border:1px solid rgba(255,255,255,.1);
+  cursor:pointer;appearance:none;min-height:48px;
+  transition:background .2s,border-color .2s;
+}
+.btn-secondary:hover{background:var(--surface2);border-color:rgba(255,255,255,.15);}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<!-- START -->
+<div id="sStart" class="screen active">
+  <div class="start-hero">
+    <div class="pill"><span class="pill-dot"></span> MCQ Practice</div>
+    <h1>Pathological Anatomy &amp; General Medicine</h1>
+    <p class="start-p">Exam-style multiple choice questions covering necrosis, inflammation, neoplasia, circulatory disorders, organ pathology and more.</p>
+    <div class="stats-row">
+      <div class="stat-chip">
+        <div class="stat-val" id="totalN">500</div>
+        <div class="stat-lbl">Questions</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-val">5</div>
+        <div class="stat-lbl">Options Each</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-val">~60</div>
+        <div class="stat-lbl">Min Est.</div>
+      </div>
+    </div>
+    <div class="tog-row">
+      <button id="btnShuffle" class="tog on">&#9654; Shuffle Questions</button>
+      <button id="btnReview" class="tog">&#128065; Review Mode</button>
+    </div>
+    <button id="btnStart" class="btn-primary">Start Quiz &#8594;</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="sQuiz" class="screen">
+  <div class="quiz-hdr">
+    <span class="q-counter">Q <strong id="qNum">1</strong> / <span id="qTot">500</span></span>
+    <div class="prog-wrap"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="timer-chip"><span class="t-dot"></span><span id="timerEl">0:00</span></div>
+  </div>
+  <div class="qc" id="qContent">
+    <div class="q-card">
+      <div class="q-num" id="qLabel">Question 1</div>
+      <div class="q-text" id="qText"></div>
+    </div>
+    <div class="opts-list" id="optsList"></div>
+    <div class="fb" id="fbBar"><i class="fb-icon" id="fbIcon"></i><span id="fbText"></span></div>
+    <div class="cf">
+      <button id="btnNext" class="btn-next">Next Question &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="sResult" class="screen">
+  <div class="result-wrap">
+    <div class="ring-box">
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r="62" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12"/>
+        <circle id="ringPath" cx="80" cy="80" r="62" fill="none"
+          stroke="url(#rg)" stroke-width="12"
+          stroke-linecap="round"
+          stroke-dasharray="389.56"
+          stroke-dashoffset="389.56"
+          transform="rotate(-90 80 80)"
+          style="transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1)"/>
+        <defs>
+          <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="var(--accent2)"/>
+            <stop offset="100%" stop-color="var(--accent)"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="pct-overlay">
+        <div class="pct-n" id="resPct">0%</div>
+        <div class="pct-s">Score</div>
+      </div>
+    </div>
+    <div class="res-title" id="resTitle"></div>
+    <div class="res-sub" id="resSub"></div>
+    <div class="res-grid">
+      <div class="res-card">
+        <div class="res-val" style="color:var(--accent)" id="resC">0</div>
+        <div class="res-lbl">Correct</div>
+      </div>
+      <div class="res-card">
+        <div class="res-val" style="color:var(--danger)" id="resW">0</div>
+        <div class="res-lbl">Wrong</div>
+      </div>
+      <div class="res-card">
+        <div class="res-val" style="color:var(--accent2)" id="resT">0:00</div>
+        <div class="res-lbl">Time</div>
+      </div>
+    </div>
+    <div class="res-btn-row">
+      <button id="btnTryAgain" class="btn-primary">Try Again</button>
+      <button id="btnNewSession" class="btn-secondary">&#8592; Main Menu</button>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+var QS=[
+{q:"Coagulative necrosis is characterized by all of the following pathologic features, EXCEPT",o:["Denaturation of cytoplasmic proteins","Karyorrhaxis","Karyopiknosis","Breakdown of cell organelles","Lipid deposition"],a:4},
+{q:"Necrotic cells are characterized by all of the following features, EXCEPT",o:["Increased eosinophilia","Hyaline-like droplets in the cytoplasm","Glassy appearance","Lysis of cytoplasm","Fragmentation of cytoplasm"],a:1},
+{q:"One of the following changes in cells at apoptosis",o:["Karyolysis","Nuclear pyknosis","Plasmolysis","Breakdown of mitochondrias","Cellular swelling"],a:1},
+{q:"One of the following variants of necrosis can be found in tuberculosis",o:["Caseous necrosis","Gangrenous necrosis","Liquefactive necrosis","Fat necrosis","Fibrinoid necrosis"],a:0},
+{q:"One of the following variants of necrosis is associated with acute pancreatitis",o:["Coagulative necrosis","Liquefactive necrosis","Caseous necrosis","Gangrenous necrosis","Fat necrosis"],a:4},
+{q:"One of the following variants of necrosis can be found in myocardial infarction",o:["Coagulative necrosis","Liquefactive necrosis","Caseous necrosis","Gangrenous necrosis","Fat necrosis"],a:0},
+{q:"One of the following variants of necrosis can be found in cerebral infarct",o:["Coagulative necrosis","Liquefactive necrosis","Caseous necrosis","Gangrenous necrosis","Fat necrosis"],a:1},
+{q:"Ischemic injury in the central nervous system results in",o:["Liquefactive necrosis","Coagulative necrosis","Caseous necrosis","Gangrenous necrosis","Fat necrosis"],a:0},
+{q:"One of the following variants of necrosis can be found in wet gangrene",o:["Coagulative necrosis","Liquefactive necrosis","Caseous necrosis","Gangrenous necrosis","Fat necrosis"],a:1},
+{q:"Apoptosis is characterized by all of the following pathologic features, EXCEPT",o:["Nuclear chromatin condensation","Nuclear fragmentation","Cytoplasmic budding","Organelles swelling","Phagocytosis of the apoptotic bodies"],a:3},
+{q:"Apoptosis occurs in all of the following events, EXCEPT",o:["Aging","Cell death in tumors","Death of immune cells","Pathologic atrophy","Cell autolysis"],a:4},
+{q:"Apoptotic cell is characterized by all of the following electron micrograph features, EXCEPT",o:["Big size of the cell","Small size of the cell","Dense cytoplasm","Normal organelle","Tightly packed organelles"],a:0},
+{q:"Apoptotic body is characterized by all of the following, EXCEPT",o:["Eosinophilic cytoplasm","Tightly packed organelles","Presence of nuclear fragments","Absence of nuclear fragments","Protein droplets in cytoplasm"],a:4},
+{q:"Borderline inflammation results from",o:["Necrosis","Apoptosis","Lipofuscinosis","All of these","None of these"],a:0},
+{q:"The tubular epithelial cells in acute tubular necrosis include all of the following pathologic features, EXCEPT",o:["Karyolysis","Plasmolysis","Plasmorrhaxis","Plasmocoagulation","Mitosis"],a:4},
+{q:"All the following features distinguish apoptosis from necrosis, EXCEPT",o:["Absence of inflammation nearby the injured cells","Fragmentation of nuclear chromatin only","Formation of apoptotic bodies","Affection of the separate cells or clusters of cells","Presence of inflammation nearby the injured cells"],a:4},
+{q:"The correct definition of autolysis",o:["Changes induced by fixatives used in histopathologic tissue preparation","Tissue degradation by intracellular enzymes","Ischemic necrosis resulting from arterial occlusion by fibrin clots","Ballooning of cell cytoplasm from lipid accumulation","Loss of tissue architecture"],a:1},
+{q:"Each type of necrosis is correctly described, EXCEPT",o:["Coagulation — loss of tissue architecture","Liquefaction — enzymatic softening and disruption of devitalized tissue","Caseous-eosinophilic, amorphous appearance","Fibrinoid — deposition of fibrin-like material in arterial walls","Autolysis — tissue degradation by intracellular enzymes"],a:0},
+{q:"Each type of necrosis is correctly paired with its most likely site of involvement, EXCEPT",o:["Coagulated necrosis — heart or kidney","Liquefactive necrosis — spleen or lung","Caseous necrosis — granulomatous inflammatory sites","Fibrinoid necrosis — arterial walls","Fat necrosis — pancreas"],a:1},
+{q:"Substances that accumulated within parenchymal cells in steatosis",o:["Amyloid","Apoproteins","Lipids","Vitamins","Ketone bodies"],a:2},
+{q:"Fatty change is often seen in all of the following organs, EXCEPT",o:["Liver","Heart","Kidney","Muscles","Lung"],a:4},
+{q:"The causes of steatosis include all of the following pathologic states, EXCEPT",o:["Obesity","Anoxia","Inflammation","Protein malnutrition","Intoxication"],a:2},
+{q:"The causes of fatty liver include all diseases, EXCEPT",o:["Obesity","Alcohol abuse","Diabetes mellitus","Hepatitis virus B","Anoxia"],a:3},
+{q:"The stain that used to identify fat is",o:["Hematoxylin and eosin stain","Sudan III stain","Congo red stain","PAS reaction","Metachromatic stain"],a:1},
+{q:"The stain that used to identify glycogen is",o:["Hematoxylin and eosin stain","Sudan III stain","Congo red stain","PAS reaction","Metachromatic stain"],a:3},
+{q:"The fatty liver has all pathologic features, EXCEPT",o:["Enlarged","Yellow","Red","Soft","Greasy"],a:2},
+{q:"Fatty change is seen by light microscopy as",o:["Intracellular granules","Basophilic granules","Extracellular granules","Vacuoles in the cytoplasm around the nucleus","Eosinophilic granules"],a:3},
+{q:"The most common cause of fatty change in the heart is",o:["Inflammation","Neoplasia","Hypoxia","Amyloidosis","Autoimmune diseases"],a:2},
+{q:"Fatty change in the heart is characterized by",o:["Red heart","Small size of heart","Tiger heart","Solid heart","Goose heart"],a:2},
+{q:"Cholesterol or cholesterol esters intracellular accumulation occurs in all of the following processes, EXCEPT",o:["Atherosclerosis","Xanthomas","Apoptosis","Inflammation and necrosis","Cholesterosis"],a:2},
+{q:"Cells which can accumulate cholesterol and cholesterol esters in atherosclerotic plaque are",o:["Macrophages and smooth muscle cells","Leucocytes and fibroblasts","Lymphocytes and erythrocytes","Fibroblasts and leucocytes","Erythrocytes and lymphocytes"],a:0},
+{q:"The cells that accumulate fat in atherosclerotic plaques are called",o:["Fibroblasts","Epithelial cells","Foam cells","Lymphocytes","Leukocytes"],a:2},
+{q:"All of the following mechanisms cause intracellular accumulation, EXCEPT",o:["Abnormal metabolism","Protein mutation","Inflammation","Enzyme deficiency","Ingestion of indigestible materials"],a:2},
+{q:"Toxic shock syndrome is marked by",o:["Fever","Hypotension","Desquamating rash","Acute cholangitis and mild jaundice","All of the above"],a:4},
+{q:"Ballooning degeneration of hepatocytes is caused by",o:["Accumulation of water and cellular swelling","Retaining of biliary material","Accumulation of iron or copper substances","Accumulation of fat droplets","Accumulation of lipofuscin"],a:0},
+{q:"Ballooning degeneration of hepatocytes results from",o:["Viral hepatitis","Alcoholic liver disease","Biliary material accumulation","Obesity","Diabetes mellitus"],a:0},
+{q:"All of the following diseases cause nephrotic syndrome, EXCEPT",o:["Lipoid nephrosis","Diabetes mellitus","Amyloidosis","Obesity","Malignant disease"],a:3},
+{q:"All of the following features characterize the ballooning degeneration of hepatocytes, EXCEPT",o:["Swollen cells","Edematous appearance","Clumped cytoplasm","Large droplets of fat","Large clear spaces"],a:3},
+{q:"Diabetes mellitus is characterized by the accumulation of glycogen in all cells, EXCEPT",o:["Epithelial cells of the proximal tubules","Liver cells","β-cells of the islets of Langerhans","Smooth muscle cells","Heart muscle cells"],a:3},
+{q:"The pathological process that can be found in the stroma of the organs in septicemia",o:["Interstitial inflammation","Hyalinosis","Necrosis","Apoptosis","Hyperplasia"],a:0},
+{q:"Pyemic abscesses can be found in the following form of sepsis",o:["Septicemia","Septicopyemia","Chronic sepsis","Bacterial endocarditis","Infective nonbacterial thrombotic endocarditis"],a:1},
+{q:"The first pyemic metastases in septicopyemia can be found in the following organ",o:["Lymph nodes","Spleen","Lung","Heart","Skin"],a:2},
+{q:"Which of the following events is most important in the development of irreversible cell injury?",o:["Cell membrane damage","Increased cell water","Myelin figure accumulation","Loss of ribosomes","Swelling of mitochondria"],a:0},
+{q:"All of the following abnormal clinical manifestations are correctly paired with the appropriate compound or pigment deposits, EXCEPT",o:["CCl4 poisoning — fat","Hemolytic anemia — bilirubin","Idiopathic hemosiderosis — hemosiderin","Vitiligo — melanin","Atrophy of hepatic cells — lipofuscin"],a:3},
+{q:"Specific stain for iron is called",o:["Hematoxylin and eosin","Sudan III","Prussian blue","Congo red","PAS-reaction"],a:2},
+{q:"Hemosiderin has all of the following features, EXCEPT",o:["Hemoglobin-derived","Golden yellow-to-brown","Granular or crystalline","Synthesized by ensyme tyrosinase","Is aggregate of ferritin"],a:3},
+{q:"Hemosiderin in the lungs is accumulated in",o:["Leukocytes","Lymphocytes","Macrophages","Fibroblasts"],a:2},
+{q:"Causes of death in pulmonary tuberculosis",o:["Pulmonary insufficiency","Pulmonary hemorrhage","Cor pulmonale","Secondary amyloidosis","All of the above"],a:4},
+{q:"The lungs in pulmonary hemosiderosis are",o:["Enlarged with turbid fluid exuding from cut surface","Increased in weight with areas of red-brown consolidation","Diminished with areas of red-brown consolidation","Diminished with turbid fluid exuding from cut srface","Unchanged"],a:1},
+{q:"Fate of primary tuberculosis includes all of the following, EXCEPT",o:["Healing fibrosis","Growing of primary affect","Hematogenous progression","Suppuration","Reactivation"],a:0},
+{q:"The color of hemosiderin granules stained with Prussian blue reaction is",o:["Yellow","Brown","Orange-red","Pink","Blue-black"],a:4},
+{q:"Hemosiderosis is seen in all pathologic processes, EXCEPT",o:["Inflammation","Hereditary increased absorption of dietary iron","Impaired use of iron","Hemolytic anemias","Malaria"],a:0},
+{q:"Morphologic changes in genetic hemochromatosis are characterized by all of the following, EXCEPT",o:["Metastatic calcification of many organs","Deposition of hemosiderin in many organs","Deposition of hemosiderin in the skin","Liver cirrhosis","Pancreatic fibrosis"],a:0},
+{q:"Melanin has all of the following features, EXCEPT",o:["Localized endogenous","Formed of ferritin","Non-hemoglobin-derived","Black-brown","Formed in melanocytes"],a:1},
+{q:"An increased amount of melanin in melanocytes and within basal keratinocytes is also known as",o:["Vacuolization","Vitiligo","Hyperpigmentation (melanosis)","Albinism","Hyperkeratosis"],a:2},
+{q:"Lipofuscin has all of the following features, EXCEPT",o:["Aging pigment","Most often seen in kidney","Yellow-brown","Noninjurious to the cells or their function","Endogenous pigment"],a:1},
+{q:"Lipofuscin pigment granules in cells result from",o:["Hemosiderosis","Accumulation of protein in cytoplasm","Accumulation of lipids in cytoplasm","Cellular swelling","Intracellular lipid peroxidation"],a:4},
+{q:"Lipofuscin granules in cells are seen in",o:["Necrosis","Denervation atrophy","Brown atrophy","Atrophy from pressure","Atrophy from diminished blood supply"],a:2},
+{q:"Heart and liver of a patient with cancer cachexia are macroscopically seen as",o:["Diminished and brown","Diminished and yellow","Enlarged and brown","Enlarged and yellow","Unchanged"],a:0},
+{q:"Lipofuscin in the liver may be found in",o:["Unchanged cells","Cells with ballooning degeneration","Cells with hyaline droplets","Cells with regressive changes","Necrotic cells"],a:3},
+{q:"Bilirubin has all of the following features, EXCEPT",o:["The end product of heme degradation","Derived from breakdown erythrocytes","Brilliant-yellow","Stained in blue-black color with Prussian blue reaction","Exists in two forms — conjugated and unconjugated"],a:3},
+{q:"Jaundice occurs in all of the following pathologic processes, EXCEPT",o:["Increased hepatocellular excretion","Excessive production of bilirubin","Reduced hepatocyte uptake","Impaired conjugation of bilirubin","Impaired bile flow"],a:0},
+{q:"Unconjugated hyperbilirubinemia occurs in all of the following pathologic processes, EXCEPT",o:["Excessive production of bilirubin","Reduced hepatocyte uptake","Decreased hepatocellular excretion","Impaired conjugation","Hepatocytes injury in viral hepatitis B"],a:2},
+{q:"Which of the following sites is an example of metastatic calcification?",o:["The kidney in nephrocalcinosis","The mitral valve in mitral stenosis of rheumatic organ","The left anterior ascending coronary artery affected by atheromatous plaques","The lung involved by metastatic carcinoma","The lung in areas of old tuberculosis foci"],a:0},
+{q:"Dystrophic calcification is encountered in all of the following areas, EXCEPT",o:["Coagulative necrosis","Intracellular fat accumulation","Caseous necrosis","Liquefactive necrosis","Enzymatic necrosis of fat"],a:1},
+{q:"Initiation of intracellular calcification occurs in",o:["Cytoplasm","Lysosome","Nucleus","Endoplasmic reticulum","Mitochondria"],a:4},
+{q:"The causes of metastatic calcification are all of the following, EXCEPT",o:["Diabetes mellitus","Increased secretion of parathyroid hormone","Destruction of bone tissue","Vitamin D-related disorders","Renal failure"],a:0},
+{q:"Metastatic calcification may occur in all of the following organs, EXCEPT",o:["Stomach (gastric mucosa)","Kidneys","Lungs","Liver","Heart, systemic arteries and pulmonary veins"],a:3},
+{q:"Deficiency of vitamin D in the adults leads to",o:["Osteosclerosis","Osteomyelitis","Osteomalatia","Osteonecrosis","Osteoporosis"],a:2},
+{q:"The pathognomonic hallmark of gout is",o:["Fibrotic scar","Granuloma","Cyst","Gumma","Tophus"],a:4},
+{q:"The primary pulmonary complex (Ghon complex) of tuberculosis includes",o:["Focus of infection in the lung","Lymphangitis","Caseous lymphadenitis","All of above","None of the above"],a:3},
+{q:"Complications of cavitary secondary tuberculosis",o:["Hemoptysis","Bronchopleural fistula","Tuberculous empyema","All of above","None of the above"],a:3},
+{q:"Active hyperaemia is the result of",o:["Dilatation of capillaries","Dilatation of arterioles","Venous engorgement","Lymphatic obstruction","Dilatation of lymphatics"],a:1},
+{q:"A severe and generalized edema with profound subcutaneous tissue swelling is called",o:["Anasarca","Ascites","Hydrothorax","Hydropericardium","Hydrocele"],a:0},
+{q:"Pathophysiologic mechanisms of edema are all of the following, EXCEPT",o:["Inflammation","Sodium retention","Calcium retention","Hypoproteinemia","Increased hydrostatic pressure"],a:2},
+{q:"Conditions that result in edema because of increased hydrostatic pressure are all of the following, EXCEPT",o:["Congestive heart failure","Inflammation","Ischemic heart disease","Systemic hypertension","Venous obstruction or compression"],a:1},
+{q:"Conditions resulting lymphedema are all of the following, EXCEPT",o:["Inflammation","Neoplasia","Postsurgical sclerosis","Constrictive pericarditis","Postirradiation sclerosis"],a:3},
+{q:"Special stain for M. tuberculosis",o:["van Gieson","Prussian blue","Hematoxilin","Ziehl-Neelsen","Sudan III"],a:3},
+{q:"Reduced plasma osmotic pressure results from all of the following, EXCEPT",o:["Nephrotic syndrome","Liver cirrhosis (ascites)","Protein malnutrition","Protein-losing gastroenteropathy","Thrombosis"],a:4},
+{q:"Ascites develops if venous outflow is impaired from this organ",o:["Lung","Brain","Liver","Lower extremities","Upper extremities"],a:2},
+{q:"Pulmonary edema commonly results from all of the following, EXCEPT",o:["Left ventricular failure","Renal failure","Systemic hypertension","Appendicitis","Myocardial infarction"],a:3},
+{q:"The generalized edema of the brain results from all of the following, EXCEPT",o:["Nonhemorrhagic cerebral infarction","Intracerebral hemorrhage","Lipofuscinosis of the brain","Obstruction of brain venous outflow","Trauma of the brain"],a:2},
+{q:"All of the following pathologic processes commonly occur together, EXCEPT",o:["Congestion and edema","Capillary rupture and hemorrhage","Breakdown of the red cells and hemosiderosis","Active hyperemia and anemia","Venous obstruction and cyanosis"],a:3},
+{q:"Microscopically, acute pulmonary congestion is characterized by all of the following, EXCEPT",o:["Engorged alveolar capillaries","Thickened and fibrotic alveolar septa","Edema fluid in alveoli","Focal intra-alveolar hemorrhage","Foci of atelectasis"],a:1},
+{q:"Microscopically, chronic pulmonary congestion is characterized by all of the following, EXCEPT",o:["Engorged alveolar capillaries","Thickened and fibrotic alveolar septa","Focal intra-alveolar hemorrhage","Numerous «heart failure cells» in lung tissue","Abscesses in lung tissue"],a:4},
+{q:"Microscopically, acute hepatic congestion is characterized by all of the following, EXCEPT",o:["Engorged central veins","Engorged central sinusoids","Destroyed central hepatocytes","Unchanged periportal sinusoids","Diminished periportal hepatocytes"],a:4},
+{q:"Microscopically, chronic passive congestion of the liver is characterized by all of the following, EXCEPT",o:["Centrolobular necrosis of hepatocytes","Centrolobular hemorrhages","Engorged periportal sinusoids","Capillarization of sinusoids","Fatty changes of periportal hepatocytes"],a:2},
+{q:"Rupture of a large artery or vien is commonly due to all of the following, EXCEPT",o:["Trauma","Atherosclerosis","Inflammatory erosion","Neoplastic erosion","Increased permeability"],a:4},
+{q:"Hemorrhages enclosed within a tissue with its destruction are referred to as",o:["Hematomas","Petechiae","Purpura","Ecchymoses","Hemothorax"],a:0},
+{q:"Minute (1- to 2-mm) hemorrhages into skin, mucous membranes or serosal surfaces are called",o:["Hematomas","Petechiae","Purpura","Ecchymoses","Hemothorax"],a:1},
+{q:"Small (0.3 to 1.0 cm) hemorrhages into skin, mucous membranes or serosal surfaces are called",o:["Hematomas","Petechiae","Purpura","Ecchymoses","Hemothorax"],a:2},
+{q:"Large (>1 to 2 cm) subcutaneous hemorrhages are called",o:["Hematomas","Petechiae","Purpura","Ecchymoses","Hemothorax"],a:3},
+{q:"Large accumulations of blood in one or another of the body cavities are termed as all of the following, EXCEPT",o:["Hemothorax","Hemopericardium","Hemosiderosis","Hemoperitoneum","Hemarthrosis"],a:2},
+{q:"The clinical significance of hemorrhage depend on all of the following, EXCEPT",o:["Blood group of individual","Volume of blood loss","Rate of blood loss","The site of hemorrhage","The diameter of damaged vessel"],a:0},
+{q:"The local and systemic factors which may caused or contribute to primary brain hemorrhage are all of the following, EXCEPT",o:["Systemic hypertension","Addison's disease","Systemic coagulation disorders","Vasculitis","Amyloid angiopathy"],a:1},
+{q:"The most common underlying cause of primary brain parenchymal hemorrhage is which of the following",o:["Systemic coagulation disorders","Vasculitis","Systemic hypertension","Neoplasms","Vascular malformations"],a:2},
+{q:"Macroscopically, brain hemorrhage is characterized by all of the following, EXCEPT",o:["Local extravasation of blood","Local damage of brain tissue","Narrowed cerebral sulci","Distended cerebral gyri","Cavitary destruction of brain"],a:4},
+{q:"Macroscopically, chronic passive congestion of the liver is characterized by all of the following, EXCEPT",o:["Hemorrhagic and wet cut surface","Red-brown central areas of the hepatic lobules","Goose liver","Tan periportal areas (fatty changes)","Nutmeg liver"],a:2},
+{q:"Microscopically, brain hemorrhage is characterized by all of the following, EXCEPT",o:["Fatty changes of damaged neurons","Central core of clotted blood","Edema of adjacent brain tissue","Dystrophy of survived neurons","Reactive proliferation of astrocytes"],a:0},
+{q:"Hypertension causes the following abnormalities in brain tissue, EXCEPT",o:["Hyaline arteriolosclerosis in smaller vessels","Minute aneurysms","Intracerebral hematoma","Ischemic necrosis","Diapedesis"],a:3},
+{q:"The cavity in cavitary fibrocaseous tuberculosis is characterized by all of the following features, EXCEPT",o:["Localized in the apex of the lung","Lined by yellow-grey caseous material","Walled by fibrous tissue","Drained by bronchus","Filled with suppurative exudate"],a:4},
+{q:"Disorders that predispose to thrombosis include all of the following, EXCEPT",o:["Pancreatic carcinoma","Pregnancy","Vitamin K deficiency","Sickle cell anemia","Severe burns"],a:2},
+{q:"Red infarction is caused by all of the following events, EXCEPT",o:["Coronary artery thrombosis","Pulmonary embolism","Torsion of the testis","Thromboembolism of superior mesenteric artery","Portal vein thrombosis"],a:0},
+{q:"Shock is commonly associated with all of the following conditions, EXCEPT",o:["Escherichia coli sepsis","Myocardial infarction","Cholera","Acute pancreatitis","Cerebral infarction"],a:4},
+{q:"Pathologic lesions resulting from passive congestion include all of the following, EXCEPT",o:["Nutmeg liver","Brown induration of the lungs","Cyanotic induration of the spleen","Strawberry gallbladder","Stasis dermatitis of the legs"],a:3},
+{q:"The causes of infarction include all of the following pathologic conditions, EXCEPT",o:["Trombotic events","Embolic events","Arterial occlusion","Local vasospasm","Hemophilia"],a:4},
+{q:"Red infarct occurs in all of the following pathologic conditions, EXCEPT",o:["Venous occlusion","Coronary occlusion","Loose tissue","Tissues with dual circulation","Previously congested with blood tissues"],a:1},
+{q:"White infarct results from the following condition",o:["Venous occlusion","Arterial occlusion","Loose tissue","Tissues with dual circulation","Previously congested with blood tissues"],a:1},
+{q:"Ischemic injury in the central nervous system results in",o:["Liquefactive necrosis","Coagulative necrosis","Caseous necrosis","Gangrenous necrosis","Fat necrosis"],a:0},
+{q:"Red infarct occurs in the following organ",o:["Lung","Heart","Spleen","Kidney","Lower extremity"],a:0},
+{q:"White infarct commonly occurs in all organs, EXCEPT",o:["Lung","Spleen","Kidney","Heart","Brain"],a:0},
+{q:"The formation of a thrombus is favored by all of the following, EXCEPT",o:["Anemia","Endothelial injury","Pregnancy","Stasis","Thrombocytosis"],a:0},
+{q:"The type of tissue necrosis at myocardial infarction",o:["Caseous necrosis","Coagulation necrosis","Enzymatic fat necrosis","Gangrenous necrosis","Fibrinoid necrosis"],a:1},
+{q:"Pulmonary emboli may originate from all of the following sites, EXCEPT",o:["Deep leg veins","Inferior vena cava","Pelvic veins","Portal vein","Right atrial appendage"],a:3},
+{q:"The development of endothelial-lined blood channels that reestablish blood flow through a vascular thrombus is known as",o:["Collateral circulation","Recanalization","Organization","Hyalinization","Incapsulation"],a:1},
+{q:"The clinical effects of fat emboli are usually due to obstruction of the small vessels of",o:["Brain and kidney","Kidney and spleen","Liver and brain","Lung and spleen","Spleen and liver"],a:0},
+{q:"The initial step of the thrombus formation is",o:["Activation of thrombin","Development of fibrin plugs","Endothelial injury","Margination of leukocytes","Trapping of red cells"],a:2},
+{q:"The type of tissue necrosis associated with renal infarction is",o:["Caseous necrosis","Coagulation necrosis","Enzymatic fat necrosis","Gangrenous necrosis","Liquefactive necrosis"],a:1},
+{q:"Disseminated intravascular coagulation is characterized by all of the following, EXCEPT",o:["Decreased fibrinolysis","Decreased plasma fibrinogen","Hemolysis","Prolonged partial thromboplastin time","Thrombocytopenia"],a:0},
+{q:"Each of the following conditions favors the development of thrombosis, EXCEPT",o:["Endothelial injury","Polycythemia","Stasis","Thrombocytopenia","Congestion"],a:3},
+{q:"The type of necrosis most often caused by sudden vascular occlusion is",o:["Apoptosis","Caseous necrosis","Coagulation necrosis","Fat necrosis","Fibrinoid necrosis"],a:2},
+{q:"All the following disorders are associated with disseminated intravascular coagulation, EXCEPT",o:["Infections","Neoplasms","Massive tissue injury","Malnutritions","Obstetric complications"],a:3},
+{q:"The usual source of pulmonary emboli are",o:["Thrombi in the deep veins of the lower extremities","Thrombi in the veins of upper extremities","Thrombi in the vena porta","Thrombi in the left atrial appendage","Thrombi in the uterus arteries"],a:0},
+{q:"Emboli in the main pulmonary artery often cause",o:["Infarction of the lung","Sudden death","Infarction of the heart","Disseminated intravascular coagulation","Acute pneumonia"],a:1},
+{q:"The origin of emboli includes all of the following, EXCEPT",o:["Thrombi","Fat droplets","Air bubbles","Amyloid masses","Microorganisms"],a:3},
+{q:"The forms of embolism include all of the following, EXCEPT",o:["Pulmonary thromboembolism","Fat embolism","Viral embolism","Bacterial embolism","Air embolism"],a:2},
+{q:"Selective stain that used to identify fat in the fat emboli syndrome is",o:["Sudan III","Tolluidin blue","Congo red","PAS reaction","Hematoxylin and eosin"],a:0},
+{q:"Acute tubular necrosis develops in",o:["Amyloidosis","Acute glomerulonephritis","Kidney infarct","Systemic thromboembolism","Hypovolemic shock"],a:4},
+{q:"The most common source of arterial thromboemboli is",o:["Cardiac thrombi","Aortic aneurysm","Pulmonary veins","Aortic atherosclerotic plaques","Iliac vein"],a:0},
+{q:"Venous emboli are most often lodged in",o:["Intestine","Kidneys","Lungs","Brain","Heart"],a:2},
+{q:"Out of various anatomic patterns of arteriolar blood supply, the adverse effects of occlusion are maximum in the following",o:["Single arterial blood supply with anastomosis","Double blood supply","Single arterial blood supply without anastomosis","Single arterial blood supply with artificial added supply","Parallel arterial supply"],a:2},
+{q:"The inflammatory infiltrate associated with an acute bacterial bronchopneumonia consists predominantly of the following cells",o:["Eosinophils","Lymphocytes","Monocytes/macrophages","Neutrophils","Plasma cells"],a:3},
+{q:"During the inflammatory response, the proper order of white cell events is",o:["Endothelial adherence, margination, phagocytosis, chemotaxis","Margination, leukodiapedesis, chemotaxis, phagocytosis","Margination, migration, chemotaxis, stasis","Stasis, leukodiapedesis, margination, phagocytosis","Leukodiapedesis, stasis, degranulation"],a:1},
+{q:"True statements concerning tuberculosis of the bone include which of the following?",o:["It affects both children and adults","Vertebrae and long bones are most commonly affected","It often occurs via hematogenous spread of the organism","All of above","None of the above"],a:3},
+{q:"The most reliable evidence of purulent inflammation is the presence in tissue of",o:["Lymphocytes","Cellular necrosis","Intracellular pigment accumulations","Neutrophils","Plasma cells"],a:3},
+{q:"Fluid that collects during acute inflammation and that has a protein content exceeding 3 g/dl and a specific gravity exceeding 1.015 is referred to as",o:["Edema","Effusion","Transudate","Serum","Exudate"],a:4},
+{q:"Cell type that transforms into morphologically distinct cells capable of immunoglobulin production is",o:["Neutrophils","Basophils","B-cells","T-cells","NK-cells"],a:2},
+{q:"The adherence of neutrophils and monocytes to the vascular endothelium prior to movement into the extravascular space is called",o:["Margination","Diapedesis","Pavementing","Emigration","Clotting"],a:2},
+{q:"Cells that are capable of phagocytosis of particulate matter include",o:["Neutrophils, macrophages","Lymphocytes, mast cells","T-cells, NK-cells","Basophils, stem cells","Endothelial cells, plasma cells"],a:0},
+{q:"The unidirectional migration of leukocytes toward a target is referred to as",o:["Diapedesis","Chemotaxis","Opsonization","Endocytosis","Margination"],a:1},
+{q:"All of the following statements describing leukocyte emigration from vessels in areas of inflammation are true, EXCEPT",o:["Leukocytes pass through gaps between the vascular endothelial cells","Neutrophils are the first cells to emigrate","Leukocytes develop pseudopods to aid in emigration","Lipofuscin accumulation accompanies leukocyte emigration","Accompanying loss of red cells is passive"],a:3},
+{q:"In an inflammatory response, neutrophils release molecules that induce all of the following effects, EXCEPT",o:["Chemotaxis of monocytes","Chemotaxis of lymphocytes","Degranulation of mast cells","Increased vascular permeability independent of histamine release","Connective tissue digestion"],a:1},
+{q:"Lymph node component of Ghon’s complex consists of",o:["Purulent lymphadenitis","Caseous pneumonia","Fibrinous pneumonia","All of above","None of the above"],a:4},
+{q:"The first cells arrived at the injured area in the inflammatory response are the following",o:["Neutrophils","Fibroblasts","Lymphocytes","Macrophages","Erythrocytes"],a:0},
+{q:"Caseous focus in tuberculosis may progress into a cavity in the following pathologic conditions",o:["Reactivation of dormant disease","Reinfection","Erosion into the bronchiole (drainage)","Lobar exudate consolidation","Caseous pneumonia"],a:3},
+{q:"Acute inflammation is characterized by all of the following features, EXCEPT",o:["Relatively short duration","Immigration of lymphocytes into the injured area","Immigration of leukocytes into the injured area","Exudation of fluid","Exudation of plasma proteins"],a:1},
+{q:"Major functions of macrophages are all of the following, EXCEPT",o:["Phagocyte function","IL-1- synthesizing function","Secretory function","Antibody-synthesizing function","Healing and repair function"],a:3},
+{q:"The inflammatory response leads to all of the following, EXCEPT",o:["Isolation of infected tissues","Inactivation of callsative agents","Neutralization of toxins","Removal of devitalized tissue debris","Obesity"],a:4},
+{q:"Acute inflammation includes all of the following types, EXCEPT",o:["Purulent","Fibrinous","Granulomatous","Serous","Catarrhal"],a:2},
+{q:"Cardinal signs of acute inflammation include all of the following, EXCEPT",o:["Local heat","Redness","Pallor","Swelling","Pain"],a:2},
+{q:"«Hairy heart» is an example of the following type of inflammation",o:["Purulent","Fibrinous","Serous","Catarrhal","Hemorrhagic"],a:1},
+{q:"Purulent inflammation is characterized by",o:["Neutrophil infiltration with tissue lysis","Fibrin deposition","Mucus production","Lymphocyte infiltration","Neutrophil infiltration"],a:0},
+{q:"The most common formation in the body cavities and the spinal fluid is",o:["Fibrinous inflammation","Serous inflammation","Catarrhal inflammation","Hemorrhagic inflammation","Granulomatous inflammation"],a:1},
+{q:"Fibrinous pericarditis occurs in all diseases, EXCEPT",o:["Acute rheumatic fever","Systemic lupus erythematosus","Uremia","Atherosclerosis","Acute myocardial infarction"],a:3},
+{q:"Lobar pneumonia is an example of the following type of inflammation",o:["Purulent","Fibrinous","Serous","Catarrhal","Granulomatous"],a:1},
+{q:"Abscess of the lung is an example of the following type of inflammation",o:["Purulent","Fibrinous","Serous","Catarrhal","Granulomatous"],a:0},
+{q:"Acute gastritis with abundant mucus production is an example of the following type of inflammation",o:["Purulent","Fibrinous","Serous","Catarrhal","Granulomatous"],a:3},
+{q:"The most reliable histopathologic evidence of chronicity in an inflammatory process in organs is",o:["Presence of hemorrhages","Leucocytic infiltrate","Blood vessels destruction","Interstitial fibrosis","Councilman's bodies"],a:3},
+{q:"A large aggregate of epithelioid cells is seen in a microscopic section of an ovary removed at surgery. Your diagnosis is",o:["Granulation tissue","Pyogenic granuloma","Granulosa cell tumor","Granulocytosis","Granuloma"],a:4},
+{q:"The granuloma in sarcoidosis is composed predominantly of",o:["Monocytes/macrophages","Neutrophils","Eosinophils","Plasma cells","Lymphocytes/fibroblasts"],a:0},
+{q:"The granuloma in primary tuberculosis is composed predominantly of",o:["Fibroblasts","Epithelioid cells","Eosinophils","Plasma cells","Neutrophils"],a:1},
+{q:"The granulomatous cell infiltrate in primary syphilis is composed predominantly of",o:["Neutrophils","Monocytes/macrophages","Plasma cells","Eosinophils","Lymphocytes"],a:2},
+{q:"Which of the following is the most typical pulmonary reaction to infection with M. tuberculosis?",o:["Hemorrhage","Fibrinoid degeneration","Caseous necrosis","Pus formation","Abscess formation"],a:2},
+{q:"The miliary lung tuberculosis is characterized by the following type of inflammation",o:["Granulomatous","Serous","Fibrinous","Supurative","Hemorrhagic"],a:0},
+{q:"Chronic inflammation is characterized by",o:["Infiltration with mononuclear cell including macrophages, lymphocytes, and plasma cells","Tissue destruction","Healing by connective tissue with angiogenesis and fibrosis","All of above","None of above"],a:3},
+{q:"The possible causes of chronicity of inflammation are all of the following, EXCEPT",o:["Persistent infections by certain microorganisms","Prolonged exposure to potentially toxic agents, either exogenous or endogenous","Autoimunity","Complete phagocytosis","Resistance of the etiologic agent"],a:3},
+{q:"What cells are playing the most important role in chronic tuberculous inflammation?",o:["Macrophages","Leucocytes","Eosinophils","Erythrocytes","Plasma cells"],a:0},
+{q:"All of these cells can be found in chronic inflammation infiltrate, EXCEPT",o:["Lymphocytes","Platelets","Macrophages","Plasma cells","Eosinophils"],a:1},
+{q:"Granulomatous inflammation develops in all of the following diseases, EXCEPT",o:["Tuberculosis","Leprosy","Syphilis","Cat-scratch disease","Budd-Chiary syndrome"],a:4},
+{q:"What type of necrosis can be found in tuberculous granuloma?",o:["Coagulation necrosis","Liquefactive necrosis","Caseous necrosis","Enzymatic fat necrosis","Fibrinoid necrosis"],a:2},
+{q:"Typical tuberculous granuloma is characterized by all of the following, EXCEPT",o:["Plasma cells","Area of central necrosis","Epithelioid cells","Langhans-type giant cells","Lymphocytes"],a:0},
+{q:"Syphilis granuloma is also called as",o:["Fibroma","Gumma","Tuberculoma","Leproma","Hepatoma"],a:1},
+{q:"Typical syphilis granuloma is characterized by all of the following, EXCEPT",o:["Area of central necrosis","Plasma cell infiltrate","Lymphocyte infiltrate","Productive vasculitis","Platelet infiltrate"],a:4},
+{q:"Macrophages in granulomatous inflammation can transform into the following cells",o:["Monocytes","Epithelial cells","Epithelioid cells","Plasma cells","Lymphocytes"],a:2},
+{q:"Gummatous infiltrate in tertiary syphilis can be found in the following organs",o:["Aorta","Testes","Liver","Bones and joints","Skin and subcutaneous tissue"],a:0},
+{q:"On gross inspection, syphilitic gumma (granuloma in tertiary syphilis) is characterized by all of the following features, EXCEPT",o:["White-gray","Rubbery","Solitary","Red-brown","Tumor- like"],a:3},
+{q:"What cells are known as \"lepra cells\" in lepromatous leprosy?",o:["Foam cells filled with lipid droplets","Macrophages filled with masses of acid-fast bacilli","Epitheliod cells","Langhans-type giant cells","Schwann's cells"],a:1},
+{q:"Miliary tuberculosis is associated with the following pathologic conditions",o:["Reinfection","Localized caseation in the lungs","Localized caseation in the lymph node","Primary infection","Hematogenous tuberculosis"],a:4},
+{q:"Pulmonary component of Ghon’s complex consists of",o:["Serous pneumonia","Caseous pneumonia","Fibrinous pneumonia","All of above","None of the above"],a:1},
+{q:"Secondary pulmonary tuberculosis may be complicated by",o:["Scarring","Calcification","Massive hemorrhage","Pleurisy","All of above"],a:4},
+{q:"The pathologic changes of vasa vasorum of aorta in syphilitic mesaortitis are characterized by the following",o:["Migratory thrombophlebitis","Productive vasculitis (obliterative endoarteritis)","Thromboangitis obliterans","Necrotizing arteriolitis","Thrombotic microangiopathy"],a:1},
+{q:"The medial destruction of aorta in tertiary syphilis may lead to the following",o:["Aneurismal dilatation of the aorta","Marfan's syndrome","Atherosclerosis","Takayasu's arteritis","Giant cell arteritis"],a:0},
+{q:"Sarcoidisis development is associated with",o:["Mycobacterium leprae","Mycobacterium tuberculosis","Treponema pallidum","Gram-negative bacillis","Unknown"],a:4},
+{q:"All of these cells can be found in sarcoid granuloma, EXCEPT",o:["Clusters of epithelioid cells","Langhans-type giant cells","Macrophages","Granulocytes","Lymphocytes"],a:3},
+{q:"The foreign-body granulomas are caused by all the following, EXCEPT",o:["Particulate matter","Synthetic material","Gram-negative bacilli","Vegetable matter","Beryllium particles"],a:2},
+{q:"All of the following cells are involved in immune response, EXCEPT",o:["Eosinophils","Macrophages","Natural killer cells","T-lymphocytes","B-lymphocytes"],a:0},
+{q:"Predominant cells aggregating in the form of follicles in the spleen",o:["CD4+T-cells","CD8+ T-cells","B-lymphocytes","Macrophages","Natural killer cells"],a:2},
+{q:"Cells that play an important role both in the induction and in the effector phase of immune response",o:["CD4+T-cells","CD8+ T-cells","B-lymphocytes","Macrophages","Natural killer cells"],a:3},
+{q:"Cells of immune system, which have numerous fine dendritic cytoplasmic processus, are called",o:["Dendritic cells","Fibroblasts","Macrophages","Leucocytes","CD4+ T-cells"],a:0},
+{q:"The meningococcal infection includes all of the following forms, EXCEPT",o:["Nasopharyngitis","Pyogenic meningitis","Meningococcemia","Pyogenic encephalitis","Chronic meningitis"],a:3},
+{q:"Macrophage cytokines are characterized by all of the following, EXCEPT",o:["Mediate natural immunity","Regulate lymphocytes growth, activation am differentiation","Activate inflammatory cells","Inhibit hematopoesis","Affect leukocyte movements"],a:3},
+{q:"Disorders of the immune system include all of the following, EXCEPT",o:["Hyalinosis","Hypersensitivity reactions","Autoimmune diseases","Immunologic deficiency syndromes","Amyloidosis"],a:0},
+{q:"The main classification base of the hypersensitivity diseases",o:["Immunologic","Byochemical","Non-immunologic","Chemical","Physiologic"],a:0},
+{q:"Type I hypersensitivity (anaphylactic type) is characterized by all of the following, EXCEPT",o:["Occurs in humans previously sensitized to the antigen","Develops rapidly (within minutes)","Mediates by IgE antibodies in humans","Develops slowly (within days)","Mast cell or basophil degranulation"],a:3},
+{q:"The secondary mediators released during Type I hypersensitivity (anaphylactic type) are all of the following, EXCEPT",o:["Leukotriens","Cytokines","Biogenic amines","Platelet-activating factor","Prostaglandin D2"],a:2},
+{q:"All of the following diseases result from Type III hypersensitivity (immune complex disorders), EXCEPT",o:["Glomerulonephritis","Farmer's lung","Myocardial infarction","Hemolitic anemia","Systemic lupus erythematosus"],a:2},
+{q:"The rash at scarlet fever is located at the following",o:["Trunk","Inner aspects of the arms","Inner aspects of the legs","Face","All of above"],a:4},
+{q:"Systemic lupus erythematosus is associated with appearance and persistence of the following agents",o:["Alloantibody","Alloantigens","Autoantigens","Heteroantibody","Heteroantigens"],a:2},
+{q:"Morphologic changes in glomeruli in systemic lupus erythematosus are characterized by all of the following, EXCEPT",o:["Swelling and proliferation of the endothelial cells","Swelling and proliferation of mesangial cells","Infiltration of neutrophils","Presence of fibrinoid necrosis and hyaline thrombi","Infiltration of plasma cells"],a:4},
+{q:"The most common cause of the glomeruli damage in systemic lupus erythematosus",o:["Local anaphylaxis","Immune complex injury","Immunologic tolerance","Genetic deficiency of the monocyte/macrophage system","Genetic deficiency of the complement system"],a:1},
+{q:"The classical example of delayed type hypersensitivity",o:["Arthus reaction","Local anaphylaxis","Complement-dependent reaction","Tuberculin reaction","Systemic anaphylaxis"],a:3},
+{q:"Morphologically, delayed-type hypersensitivity is characterized by all of the following, EXCEPT",o:["Accumulation of the mononuclear cells around venules","Dermal edema","Deposition of fibrin in the interstitium of derma","Accumulation of the mononuclear cells around small vein","Deposition of hemosiderin in the derma"],a:4},
+{q:"A microscopic aggregation of the epithelioid cells, usually surrounded by a collar of lymphocytes is referred to as",o:["Papilloma","Condyloma","Melanoma","Lipoma","Granuloma"],a:4},
+{q:"Cells that compose the granuloma in type IV hypersensitivity reactions are all of the following, EXCEPT",o:["Lymphocytes","Erythrocytes","Macrophages","Epithelioid cells","Giant cells"],a:1},
+{q:"Autoimmune diseases involving a single organ or cell type are all of the following, EXCEPT",o:["Hashimoto thyroiditis","Goodpasture syndrome","Insulin-dependent diabetes mellitus","Myocardial infarction","Myasthenia gravis"],a:3},
+{q:"A state in which an individual is incapable of developing an immune response to a specific antigen is called",o:["Arthus reaction","Local anaphylaxis","Complement-dependent reaction","Immunologic tolerance","Systemic anaphylaxis"],a:3},
+{q:"The organs most commonly and seriously damaged in systemic lupus erythematosus are all of the following, EXCEPT",o:["Skin","Eye","Joints","Serosal surfaces","Heart and vessels"],a:1},
+{q:"Morphologic changes in salivary glands in Sjogren's syndrome include all of the following, EXCEPT",o:["Lymphocytic infiltrate","Atrophy of parenchima","Fibrosis","Leukocytic infiltrate","Fatty replacement of parenchima"],a:3},
+{q:"Scarlet fever is most common in age",o:["1-2 years","3-15 years","20-25 years","35-50 years","50-70 years"],a:1},
+{q:"The cellular adaptation without cell proliferation includes all of the following, EXCEPT",o:["Apoptosis","Atrophy","Hyperplasia","Hypertrophy","Metaplasia"],a:2},
+{q:"Hyperplasia is characterized by",o:["Increase in the size of cells","Increase in the number of cells","Increase in the number of nuclei in cells","Shrinkage in the size of cells","Atypia of cells"],a:1},
+{q:"The proliferation of the glandular epithelium of a female during pregnancy is an example of",o:["Compensatory hyperplasia","Pathologic hyperplasia","Hormonal hyperplasia","Compensatory hypertrophy","Hormonal hypertrophy"],a:2},
+{q:"The hyperplasia of hepatic cells that occurs after partial hepatoectomy is an example of",o:["Pathologic hyperplasia","Hormonal hyperplasia","Hormonal hypertrophy","Compensatory hyperplasia","Compensatory hypertrophy"],a:3},
+{q:"Conditions leading to endometrial hyperplasia include all of the following, EXCEPT",o:["Polycystic ovarian disease","Functioning granulosa cell tumors of the ovary","Prolonged administration of estrogenic substances","Excessive ovarian cortical function","Prolonged administration of analgesic substances"],a:4},
+{q:"Simple endometrial hyperplasia is characterized by all of the following, EXCEPT",o:["Increase in the number and size of endometrial glands","Atypia of gland cells","Complex endometrial glands","Increase in gland-to-stroma ratio","Dilated endometrial glands"],a:1},
+{q:"Hypoplasia is characterized by all of the following, EXCEPT",o:["Incomplete development of an organ","Decreased number of cells","Increased number of cells","Underdevelopment of an organ","Decreased function of an organ"],a:2},
+{q:"Dysplasia is characterized by all of the following, EXCEPT",o:["Abnormal organization of cells","Loss in the uniformity of individual cells","Loss in cell architectural organization","Replacement of one adult cell type by another adult cell type","Variation of cells in size and shape"],a:3},
+{q:"Which pathologic process results from dysplasia?",o:["Aplasia","Hypoplasia","Hyperpigmentation","Calcification","Neoplasia"],a:4},
+{q:"Hypertrophy is characterized by",o:["Increase in the size of cells and of the organ","Shrinkage in the size of cells and of the organ","Increase in the number of cells","Abnormal organization of cells","Variation of cells in size and shape"],a:0},
+{q:"The massive growth of the gravid uterus with large plump cells is an example of",o:["Pathologic hypertrophy","Hormone induced physiologic hypertrophy","Pathologic hyperplasia","Dysplasia","Metaplasia"],a:1},
+{q:"Working (physiologic) hypertrophy is characterized by",o:["Pathologic hypertrophy of the breast during lactation","Hypertrophy of the skeletal muscle cells in a body-builder","Pathologic hypertrophy of the uterus during pregnancy","Hypertrophy of the skeletal muscle cells in a patient with immobilized broken limb","Hypertrophy of the endometrium due to ovarian tumor"],a:1},
+{q:"The causes of pathologic hypertrophy are all of the following, EXCEPT",o:["Hypertrophy develops due to impairment of endocrine functions","Hypertrophy of cardiac muscle at some cardiovascular diseases","Hypertrophy of the uterus in pregnancy","Vicarious (substitutional) hypertrophy","Compensatory reparative hyperplasia"],a:2},
+{q:"The pathological process that can be found in lymphoid organs in septicemia",o:["Hypoplasia","Hyperplasia","Infarct","Acute inflammation","Hemosiderosis"],a:1},
+{q:"Give the macroscopic characteristics of the lung in chronic diffuse obstructive emphysema",o:["The size is increased, the elasticity is normal","Airiness is increased, elasticity is reduced","The size is reduced, the consistency is dense","Brown color, dense consistency","Airiness is reduced, color is gray"],a:1},
+{q:"Cardiac hypertrophy is characterized by all pathologic changes, EXCEPT",o:["Increased number of myocardial cells","Increased mass and size of the heart","Increased protein synthesis","Interstitial cardiac fibrosis","Inadequate vasculature"],a:0},
+{q:"Atrophy is characterized by",o:["Variation of cells in size and shape","Increase in the size of cells","Shrinkage in the size of cells by loss of cell substance","Increase in the number of cells","Abnormal organization of cells"],a:2},
+{q:"One of the variants of physiologic atrophy is",o:["Atrophy of skeletal muscle by the immobilized broken limb","Atrophy of uterus after parturition","Kidney atrophy from pressure (hydronephrosis)","Atrophy of the endometrium by ovarian tumor","Atrophy of the brain in atherosclerosis"],a:1},
+{q:"Causes of pathologic atrophy are all of the following, EXCEPT",o:["Loss of endocrine stimulation","Loss of innervation","Diminished blood supply","Decreased workload","Increased workload"],a:4},
+{q:"The causes of pathologic atrophy are all of the following, EXCEPT",o:["Oncologic diseases","Aging","Pressure","Inadequate nutrition","Denervation"],a:1},
+{q:"What pigment can be found in the cytoplasm of heart and muscle cells in aging atrophy?",o:["Lipofuscin","Melanin","Hemosiderin","Bilirubin","Ferritin"],a:0},
+{q:"Metaplasia is",o:["Reversible increase in the size of cells","Irreversible change in which one adult cell type isreplaced by another adult cell type","Reversible change in which one adult cell type is replaced by another adult cell type","Reversible abnormal organization of cells","Reversible increase in the number of cells"],a:2},
+{q:"What type of metaplasia may occur in the respiratory tract in chronic smokers?",o:["Epithelial metaplasia — squamous to columnar","Metaplasia to undifferentiated mesenchymal cells","Connective tissue metaplasia","Epithelial metaplasia — columnar to squamous","None of these"],a:3},
+{q:"The replacement of the normal secretory columnar epithelium by the nonfunctioning stratified squamous epithelium may occur in all of the following organs, EXCEPT",o:["Bile ducts of the liver","Excretory ducts of the salivary glands","Excretory ducts of the pancreas","Respiratory epithelium of the bronchi","Tubular epithelium of the kidney"],a:4},
+{q:"Hydronephrosis is characterized by all of the following, EXCEPT",o:["Thickening of the renal parenchyma","Thinning of the renal parenchyma","Dilatation of the renal pelvis","Dilatation of the renal calyces","Progressive atrophy of the kidney"],a:0},
+{q:"For metaplasia the following holds true",o:["It is a disordered growth","It affects only epithelial tissues","It affects only mesenchymal tissues","It is an irreversible and progressive change","It is a reversible change"],a:4},
+{q:"Pathologic hypertrophy may take place at",o:["Brain","Heart","Lungs","Spleen","Gallbladder"],a:1},
+{q:"Cachexia is accompanied by",o:["Squamous metaplasia in bronchi","Brown atrophy of myocardium","Hydronephrosis","Hemosiderosis of liver","Cortical brain atrophy"],a:1},
+{q:"Malignant tumor is characterized by all of the following, EXCEPT",o:["Increased abnormal tissue mass","Uncoordinated invasive growth","Relatively autonomous growth","Decreased abnormal tissue mass","Metastases"],a:3},
+{q:"The growth of neoplasms is critically dependent on the following",o:["Localization","Tumor stroma","Neutrophil immigration","Lymphatic drainage","Inflammatory reaction"],a:1},
+{q:"The nomenclature of tumors is based on",o:["Stromal component","Localization","Inflammatory changes","Vascular component","Parenchymal component histogenesis"],a:4},
+{q:"The term of a benign mesenchymal tumor is constructed by combining the word designating the tumor cell origin with addition",o:["-sarcoma","-carcinoma","-oma","-itis","-osis (-asis)"],a:2},
+{q:"Benign tumor arising from fibroblastic cells is called",o:["Chondroma","Adenoma","Osteoma","Fibroma","Papilloma"],a:3},
+{q:"Benign tumor arising from cartilaginous tissue is called",o:["Chondroma","Adenoma","Osteoma","Fibroma","Papilloma"],a:0},
+{q:"Benign tumor arising from osteoblasts is called",o:["Chondroma","Adenoma","Osteoma","Fibroma","Papilloma"],a:2},
+{q:"Malignant tumors arising from mesenchymal tissue are referred to as",o:["Sarcomas","Adenocarcinomas","Papillomas","Cystadenomas","Polyps"],a:0},
+{q:"The important factors associated with the increasing incidence of tumors are all of the following, EXCEPT",o:["Age","Diet","Environment","Acute inflammation","Genetic makeup"],a:3},
+{q:"The differention criteria between benign and malignant tumors are all of the following, EXCEPT",o:["Maturity","Rate and character of growth","Localization","Anaplasia","Metastases"],a:2},
+{q:"Morphologic atypia is characterized by all of the following, EXCEPT",o:["Cell pleomorphism","Metaplasia","Alteration of parenchyma/ stroma ratio","Atypical mitoses","Enlarged hyperchromatic nuclei"],a:1},
+{q:"Lack of cell differentiation (anaplasia) in malignant tumor is characterized by all of the following, EXCEPT",o:["Cellular and nuclear pleomorphism","Hyperchromatic nuclei","Increased nuclear-cytoplasmic ratio","Coarsely clumped chromatin","Metastases"],a:4},
+{q:"Anaplasia is characterized by all of the following, EXCEPT",o:["Cellular and nuclear pleomorphism","Formation of tumor giant cells","Formation of atypical mitotic figures","Formation of Langhans' giant cells","Hyperchromatic nuclei"],a:3},
+{q:"Dysplasia is characterized by all of the following, EXCEPT",o:["Loss of cell uniformity","Hyperchromatic enlarged nuclei","Appearance of mitotic figures","Loss of cell architectural orientation","Formation of tumor giant cells"],a:4},
+{q:"Negative effects resulting from neoplasia are all of the following, EXCEPT",o:["Compression of adjacent tissues","Cachexia","Destruction of adjacent tissues","Paraneoplastic syndrome","Cancer obesity"],a:4},
+{q:"Tumor cell invasion into the extracellular matrix can be characterized by all of the following, EXCEPT",o:["Detachment of the tumor cells from each other","Intravasation","Attachment to matrix components","Degradation of extracellular matrix","Migration of tumor cells"],a:1},
+{q:"Hamartoma refers to",o:["Tumor differentiating towards more than one cell line","Tumor arising from totipotent cells","Mass of disorganised but mature cells indigenous to the particular site","Mass of ectopic rests of normal tissue","Extravasation of blood into the tissues with resultant swelling"],a:2},
+{q:"Increased number of normal mitoses may be present in the following tissues, except",o:["Bone marrow cells","Nails","Endometrial reticular cells","Hepatocytes","Intestinal epithelium"],a:1},
+{q:"A tumor is called medullary when it is almost entirely composed of",o:["Amyloid stroma","Large areas of necrosis","Abundant lymphoid tissue","Parenchymal cells","Stromal cells"],a:3},
+{q:"Arteries of which organs are most often affected in atherosclerosis",o:["Liver, spleen","Brain, heart","Kidneys, adrenal glands","Lungs, pancreas","Pituitary gland, thyroid gland"],a:1},
+{q:"Grading of tumors depends upon the following, except",o:["Degree of anaplasia","Metastatic spread","Rate of growth of cells","Degree of differentiation","Tissue origin"],a:4},
+{q:"What are the factors that are most important in the development of atherosclerosis",o:["Hyperproteinemia, hypergammaglobulinemia","Hyperlipidemia, arterial hypertension","Arterial hypotension","Chronic alcoholism","State of immunity"],a:1},
+{q:"Which anaemia are characterized by megaloblastic type of hematopoiesis",o:["Iron deficiency anaemia,","Vitamin B12 and/or folic acid deficiency megaloblastic anaemia","Haemolytic anaemias","Aplastic anaemia","Post-haemorrhagic anaemia"],a:1},
+{q:"The first site of metastasis for adenocarcinoma of the colon is most likely to",o:["Brain","Liver","Lung","Lymph nodes","Spleen"],a:3},
+{q:"Lesion representing benign neoplasia",o:["Chondroblastic osteosarcoma of the bone","Granuloma of the soft tissue","Tuberculoma","Papillary serous cystadenoma of the ovary","Papillary carcinoma of the thyroid"],a:3},
+{q:"The most characteristic feature of malignant neoplasm in contrast to a reactive or inflammatory overgrowth",o:["Growth factor production","Necrosis","Localization","Autonomous growth following the removal of all provoking factors","Adjacent tissue compression"],a:3},
+{q:"The most characteristic manifestation of malignant tumor",o:["Cellular atypia and pleomorphism","Compression of surrounding tissue","Large size","Necrosis","Metastases"],a:4},
+{q:"All of the following features are typical for malignant tumor, except",o:["Anaplasia","High mitotic rate","Necrosis","Metastases","Encapsulation"],a:4},
+{q:"All of the following neoplasms are malignant, EXCEPT",o:["Adenocarcinoma","Melanoma","Seminoma","Chorionepithelioma","Papillary cystadenoma"],a:4},
+{q:"The factor assessed in the histological grading of a malignant tumor",o:["The number of lymph node metastases","The size (diameter) of the primary tumor","The extent of invasion of the primary tumor into surrounding structures","The degree of cytological differentiation of the primary tumor","The presence or absence of liver metastases"],a:3},
+{q:"A sequence of metaplasia => dysplasia => neoplasia is known to occur in the oncogenesis of all of the following cancers, EXCEPT",o:["Squamous cell carcinoma of the bladder","Carcinoid tumor of the small bowel","Squamous cell carcinoma of the lung","Adenocarcinoma of the esophagus","Squamous cell carcinoma of the endocervix"],a:1},
+{q:"Lesion of the female genital tract considered precancerous",o:["Cystic atrophy of the endometrium","Endocervical polyps","Condyloma acuminatum of the vulva","Endometrial polyps","Atypical hyperplasia of the endometrium"],a:4},
+{q:"Important prognostic features in invasive breast cancer are all of the following, EXCEPT",o:["Histologic type of the tumor","Grade of the tumor","Size of the tumor","Secondary necrosis","Presence or absence of estrogen receptors on tumor cells"],a:3},
+{q:"Carcinomas with epidermoid cell differentiation are called",o:["Sarcomas","Adenocarcinomas","Squamous cell carcinomas","Papillomas","Cystadenomas"],a:2},
+{q:"Carcinomas forming glandular structures are called",o:["Sarcomas","Papillomas","Adenocarcinomas","Cystadenomas","Polyps"],a:2},
+{q:"The term of a benign epithelial tumor is constructed by combining the word designating the tumor cell origin plus ending",o:["-sarcoma","-carcinoma","-itis","-oma","-osis (-asis)"],a:3},
+{q:"Benign epithelial neoplasm producing finger-like projection from epithelial surfaces is referred to as",o:["Papilloma","Adenoma","Fibroma","Sarcoma","Teratoma"],a:0},
+{q:"Most common benign tumor of the ovary",o:["Papilloma","Fibroma","Cystadenoma","Adenocarcinoma","Melanoma"],a:2},
+{q:"Benign tumors can be differentiated from malignant ones by all of the following signs, EXCEPT",o:["Maturity","Rate and character of growth","Local invasion","Edema","Metastases"],a:3},
+{q:"Lack of differentiation is characteristic of the",o:["Hyperplasia","Hypoplasia","Anaplasia","Hypertrophy","Dysplasia"],a:2},
+{q:"All of the following morphologic features characterize the adenocarcinoma cells, EXCEPT",o:["Variation in size and shape","Hyperchromatic nuclei","Enlarged nucleoli","Hypochromatic nuclei","Atypical mitoses"],a:3},
+{q:"Most common benign tumor of the female breast",o:["Cystadenoma","Fibroadenoma","Sarcoma","Fibroma","Adenocarcinoma"],a:1},
+{q:"First hematogenous metastases of the endometrium carcinoma can be found",o:["Lungs","Liver","Bones","Regional lymph nodes","Central nervous system"],a:0},
+{q:"The microscopical features of malignant skin melanoma are all of the following, EXCEPT",o:["Brown-black cytoplasmic granules","Large nuclei with irregular contours","Clumped chromatin under nucleolar membrane","Glandular formation","Formation of the tumor nests"],a:3},
+{q:"The major classes of brain tumors are all of the following, EXCEPT",o:["Gliomas","Chondromas","Neuronal tumors","Poorly differentiated neoplasms","Meningiomas"],a:1},
+{q:"The microscopical features of glioblastoma multiforme are all of the following, EXCEPT",o:["Secondary necroses","Vascular and endothelial cell proliferation","Amyloid masses in tumor stroma","Cellular and nuclear pleomorphism","Absence of tumor borderline"],a:2},
+{q:"What anemia are splenomegaly and jaundice typical for?",o:["Acute post-hemorrhagic anemia","Chronic post-hemorrhagic anemia","Pernicious anemia","Iron-deficiency anemia","Hemolytic anaemia"],a:4},
+{q:"The microscopical features of the cavernous hemangioma are all of the following, EXCEPT",o:["Sharply defined","Partly or completely filled with blood","Cavernous vascular spaces, sometimes with thrombosis","Micrometastases","Separated by a scant connective tissue stroma"],a:3},
+{q:"Benign tumor arising from smooth muscle cells is called",o:["Leiomyoma","Myoma","Chondroma","Rhabdomyoma","Fibroma"],a:0},
+{q:"The morphological manifestations of diabetic nephropathy are",o:["Diabetic glomerulosclerosis","The accumulation of glycogen in the tubule epithelium","Kidney shrinkage","None of above","All of above"],a:4},
+{q:"Leiomyomas of the uterine are characterized by all of the following, EXCEPT",o:["Arise from uterine muscle","May undergo degenerative changes","Are hormone-dependent tumors","Usually are multiple tumors","Always undergo malignization"],a:4},
+{q:"First hematogenous metastases of the femur soft tissue fibrosarcoma are founded in",o:["Liver","Brain","Bones","Lungs","Regional lymph node"],a:3},
+{q:"The glioblastoma multiforme metastasizes to the",o:["Peripheral nervous system","Liver","Central nervous system","Kidneys","Lungs"],a:2},
+{q:"The following type of nevi most often progress to malignant melanoma",o:["Compound nevus","Blue nevus","Dysplastic nevus","Epithelioid nevus","Junctional nevus"],a:2},
+{q:"What are the manifestations of diabetic macroangiopathy?",o:["Thrombosis and thromboembolism of arteries of elastic and muscle types","Atherosclerosis of the arteries of elastic and muscle types","Arteriolosclerosis and hyalinosis","Amyloidosis of the arteries","Vasculitis"],a:1},
+{q:"The term soft tissue tumors includes",o:["Mesodermal tissue","Squamous epithelium","Reticuloendothelial tissues","Glial tissue","Columnar epithelium"],a:0},
+{q:"Primary CNS tumors may arise from the following constituent cells, except",o:["Neuroglia","Microglia","Neurons","Meninges","Choroids tela"],a:1},
+{q:"Note the factors contributing to the urinary stones formation?",o:["Inflammation","Stagnant urine","Violation of mineral metabolism","None of above","All of above"],a:4},
+{q:"The characteristic microscopic changes of chronic pyelonephritis are all of the following, EXCEPT",o:["Sclerotic changes combined with inflammatory","Lymphoplasmocytic infiltration is predominant","The appearance of the crescents","Renal tissue thyroidization","Changes are more often focal"],a:2},
+{q:"All of the following complications can develop in acute pyelonephritis, EXCEPT",o:["Sepsis","Kidney carbuncle","Perinephritis","Polycystic kidney disease","Paranephritis"],a:3},
+{q:"Pigmented lesion",o:["Superficial spreading melanoma","Lentigo maligna melanoma","Acral lentigenous melanoma","Nodular melanoma","All of the above"],a:4},
+{q:"Anemia of thalassemia minor is a consequence of",o:["Intrinsic factor deficiency","Iron deficiency","Metabolic inhibition of DNA replication","Gene defect","Hemolytic crisis"],a:3},
+{q:"Histological signs of Barrett's esophagus are",o:["Gastric and intestinal epithelial metaplasia","Squamous metaplasia of the epithelium","Epithelial dysplasia","Epithelial hyperplasia","Preservation of the epithelium"],a:0},
+{q:"What kidney amiloidosis complication was the direct cause of death?",o:["Acute heart failure","Uremia","Acute pulmonary failure","Bronchopneumonia","Fibrinous pericarditis"],a:1},
+{q:"Iron deficiency causes",o:["Hypochromic macrocytic anemia","Hypochromic microcytic anemia","Hyperchromic macrocytic anemia","Hyperchromic microcytic anemia","None of the above"],a:1},
+{q:"The term «dysentery» refers to diarrhea associated with all of the following symptoms, EXCEPT",o:["Abdominal cramping","Tenesmus","Stools containing blood","«Rice-water» stools","Stools containing pus and mucus"],a:3},
+{q:"An infectious agent, causing Typhoid fever",o:["S.enterica","S.typhi.","S. typhimurium","S.flexneri","S.sonnei"],a:1},
+{q:"Aplastic anemia results from",o:["Failure of common hematopoietic stem cells of the bone marrow","Activation of hematopoiesis","Iron deficiency","None of the above","All of the above"],a:0},
+{q:"Mumps virus causes a transient inflammation of the following",o:["Parotid glands","Testes","Pancreas","All of above","None of the above"],a:3},
+{q:"Mainly types of mycoses all of the following EXEPT",o:["Superficial mycoses","Cutaneous mycoses","Invasive mycoses","Systemic mycoses"],a:2},
+{q:"Pernicious anemia causes pathologic changes in the following anatomic region of stomach",o:["Antrum","Fundus","Pyloric part","All of the above","None of the above"],a:1},
+{q:"Anemia related to vitamin В12 deficiency is characterized by",o:["Acellular bone marrow","Hypocellular bone marrow","Normocellular bone marrow","None of the above","All of the above"],a:2},
+{q:"Macrocytlc anemia that responds to administration of intrinsic factor is associated with",o:["Chronic liver disease","Blind intestinal loop syndrome","Duodenal ulcer","Atrophic gastritis","Hypertrophic gastritis"],a:3},
+{q:"The effects of diabetic macro-angiopathy are",o:["Myocardial infarction","Stroke","Lower extremity gangrene","All of above","None of the above"],a:3},
+{q:"Aplastic anemia is characterized by all of the following, except",o:["Low white blood cell count","Low red blood cell count","Low platelet count","Fatty marrow","Erythroid hyperplasia of the bone marrow"],a:4},
+{q:"The diagnostic cell for Hodgkin's disease is",o:["Lymphocyte","Foam cell","Reed-Sternberg cell","Myeloma cell","Macrophage"],a:2},
+{q:"The diagnostic cell for multiple myeloma is",o:["T lymphocyte","Eosinophile","Reed-Sternberg cell","Plasma cell","В lymphocyte"],a:3},
+{q:"Multiple myeloma is characterized by abnormal accumulation in tissues of",o:["Hyaline","Lipofuscin","Amyloid","Hemosiderin","Melanin"],a:2},
+{q:"Burkitt lymphoma is characterized by",o:["«Starry sky» appearance","Infiltration of plasma cells","Presence of foam cells","Presence of Reed-Sternberg cells","«Glassy» appearance of the cell"],a:0},
+{q:"Causes of death in leukemia are",o:["Aplastic anemia","Disseminated infection","Hemorrhage into the brain","All of above","None of the above"],a:3},
+{q:"The adenovirus infection is characterized by all of the following, EXCEPT",o:["Rhinolaryngitis","Conjunctivitis","Pharyngitis","Gastroenteritis","Tracheobronchitis"],a:3},
+{q:"Measles virus is transmitted by the following",o:["Food","Respiratory droplets","Feces","Blood"],a:1},
+{q:"Acute splenic tumor means",o:["Rapidly developing primary splenic lymphoma","Rapidly developing primary splenic carcinoma","Rapidly developing metastatic carcinoma","Splenic enlargement due to infiltration by leukemia","Splenic enlargement due to systemic acute infection"],a:4},
+{q:"All of the following statements correctly describe nodular non-Hodgkin's lymphomas, EXCEPT",o:["They are often associated with a predictable chromosomal translocation","They have a better prognosis than diffuse lymphomas","They are characterized by cells with irregular nuclear contours","They are always composed of neoplastic В cells","Main diagnostic cells are Pirogov-Langhan`s cells"],a:4},
+{q:"Chronic myelogenous leukemia is characterized by the following features",o:["Transition to acute leukemia","Splenomegaly","Philadelphia chromosomes in stem cells","All of above","None of the above"],a:3},
+{q:"Subtypes of Hodgkin's disease include all of the following, EXCEPT",o:["Nodular sclerosis","Mixed cellularity","Lymphocytepredominance","Nodular amyloidosis","Lymphocyte depletion"],a:3},
+{q:"Splenomegaly is common in terminal stages of following diseases",o:["Chronic lymphocytic leukemia","Chronic myelogenous leukemia","Hodgkin's disease, stage IV","All of above","None of the above"],a:3},
+{q:"Chronic myelogenous leukemia is usually associated with the following",o:["Infections","Splenomegaly","Anemia","All of above","None of the above"],a:3},
+{q:"Myeloproliferative disorders include the following, except",o:["Chronic myeloid leukemia","Chronic erthromyelosis","Erythremia","True polycytemia (Vaquez-osler syndrome)","Hodgkin's disease"],a:4},
+{q:"Massive enlargement of spleen (below umbilicus) may occur generally from the following causes, except",o:["Chronic myeloid leukemia","Portal vein obstruction","Thalassemia major","Chronic malaria","Acute venous congestion of spleen"],a:4},
+{q:"Ulcerated mucosal lesions in the oral cavity near the opening of Stensen ducts are referred to as",o:["Koplik spots","Luschka spots","Burkitt spots","Paget spots","Vegetations"],a:0},
+{q:"Blood vessels affected in atherosclerosis",o:["Aorta only","Aorta and large arteries","Large arteries and large veins","Large veins","Aorta and arterioles"],a:1},
+{q:"Blood vessels affected in systemic hypertension",o:["Arterioli","Aorta and large arteries only","Aorta only","Large arteries and large veins","Venules"],a:0},
+{q:"The cells accumulating cholesterol or cholesterol esters in atherosclerotic plaque",o:["Neutrophils","Lymphocytes and macrophages","Macrophages and smooth muscle cells","Mesenchymal cells","Giant cells"],a:2},
+{q:"Material deposited in arteriolar walls in systemic hypertension",o:["Amyloid","Glycogen","Cholesterol or cholesterol esters","Lipoprotein","Hyaline"],a:4},
+{q:"Morphological signs of chickenpox.",o:["Vesicles","Macula","Pustules","Abscesses","Petechiae"],a:0},
+{q:"Atherosclerosis is predominantly a disease of",o:["Intima","Media","Adventitia","Media and adventitia","Entire vessel wall"],a:0},
+{q:"The following lipid has highest association with atherosclerosis",o:["Triglycerides","Low-density lipoproteins","Very-low density lipoproteins","High density lipoproteins","All of the above"],a:1},
+{q:"Chronic inflammation leads to formation of long-standing hepatic production of serum amyloid- associated (SAA) protein which leads to amyloid accumulation",o:["Primary amyloidosis (AL amyloid)","Senile systemic amyloidosis (ATTR amyloid)","Hemodialysis-associated amyloidosis (AH (Aβ 2 m) amyloid)","Familial Mediterranean fever (AA amyloid)","Secondary or reactive amyloidosis (AA amyloid)"],a:4},
+{q:"The most common cause of dissecting aneurysm of aorta is",o:["Cystic medial necrosis of Erdheim","Trauma during cardiac catheterisation","Systemic hypertension","Marfan syndrome","All of the above"],a:2},
+{q:"Dissecting aneurysm of aorta causes separation of aortic wall as under",o:["Between intima and media","Between media and adventitia","Between inner two-third of media and outer one-third","All of the above","None of the above"],a:2},
+{q:"Under H&E appear smooth, glassy, eosinophilic, homogeneous, extracellular material it is",o:["Amyloid deposits","Cholesterol","Apoproteins","Vitamins","Triglycerides"],a:0},
+{q:"An autopsy of a 45-year-old female, who suffered from a fibrous-cavernous tuberculosis, revealed the kidneys were big, dense and white. Which pathological process is most likely?",o:["Mucoid swelling","Fatty dystrophy","Hemochromatosis","Hyalinosis","Amyloidosis"],a:4},
+{q:"What staining is used to see amyloids, and how do they appear in polarized light?",o:["Congo red staining and they are seen as apple-green in polarized light.","Sudan III stain are seen as eosinophilic in polarized light.","PAS reaction and they are seen as eosinophilic in polarized light.","Congo red staining and they are seen as eosinophilic in polarized light.","Hematoxylin and eosin stain are seen as apple-green in polarized light."],a:0},
+{q:"The most important and common complicated atheromatous lesion in coronary artery in acute myocardial infarction is",o:["Calcification","Coronary thrombosis","Aneurysm","Ulceration","All of the above"],a:1},
+{q:"Infarcts are most common in",o:["Left ventricle","Right ventricle","Left atrium","Right atrium","Interventricular septum"],a:0},
+{q:"Chronic ischemic heart disease is most often due to",o:["Coronary atherosclerosis","Repetitive coronary vasospasm","Embolisation to coronary branches","Stenosis of coronary entry","All of the above"],a:0},
+{q:"In hypertensive heart disease left ventricular hypertrophy is correlated with",o:["Duration of hypertension","Severity of hypertension","Cause of hypertension","Severity of coronary atherosclerosis","All of the above"],a:0},
+{q:"The consequences of atherosclerosis are all of the following, EXCEPT",o:["Myocardial infarction","Cardiomyopathy","Cerebral infarct","Gangrene of lower extremities","Abdominal aortic aneurysm"],a:1},
+{q:"The complications of atheromatous plague are all of the following, EXCEPT",o:["Thrombus formation","Plaque rupture","Plaque malformation","Calcification","Hemorrhage"],a:2},
+{q:"At gross examination, the kidneys in systemic hypertension are characterized by all of the following features, EXCEPT",o:["Reduced in size and weight","Fine granularity on cortical surface","Grain leather-like cortical surface","Hemorrhages on cortical surface","Narrowed cortical surface on section"],a:3},
+{q:"All of the following terms may be used to designate the atherosclerotic plaque, EXCEPT",o:["Fibrinous plaque","Fibrous plaque","Fibrofatty plaque","Atheromatous plaque","Fibrolipid plaque"],a:0},
+{q:"Main nonmodifiable risk factors for atherosclerosis are all of the following, EXCEPT",o:["Age","Infection","Male gender","Family history","Genetic abnormalities"],a:1},
+{q:"Changes in the aging heart are all of the following, EXCEPT",o:["Decreased left ventricular cavity size","Epicardial coronary artery tortuosity","Decreased subepicardial fat","Brown atrophy of myocardium","Increased number of inflammatory cells in myocardium"],a:4},
+{q:"Symptoms of cardiac dysfunction include all of the following, EXCEPT",o:["Failure of the pump itself","Disorders of blood coagulation","Obstruction of blood flow","Regurgitant blood flow","Disorders of cardiac conduction"],a:1},
+{q:"The following type of cardiomyopathy is classically characterized by four chamber dilatation",o:["Idiopathic congestive cardiomyopathy","Idiopathic hypertrophic cardiomyopathy","Endomyocardial fibrosis","Loeffler's endocarditis","All of the above"],a:0},
+{q:"The most serious complication of lower extremity thrombophlebitis is",o:["Cerebral infarction","Kidney infarction","Myocardial infarction","Pulmonary infarction","Intestinal infarction"],a:3},
+{q:"Thromboangiitis obliterans occurs predominantly in people with",o:["Congenital cardiac atrial defects","Atherosclerotic heart disease","Diets high in saturated fats","Heavy cigarette-smoking habits","Low exercise tolerance"],a:3},
+{q:"Rheumatic diseases are united by a single symptom",o:["Damage to the cardiovascular system","Systemic progressive disorganization of connective tissue","Joint deformity","Disseminated thrombus formation","Common hypermelanosis"],a:1},
+{q:"What is base of leukemia division into acute and chronic",o:["Appearance of tumor cells in peripheral blood","The degree of differentiation of tumor cells","Blast crisis","Change in the number of leukocytes in the peripheral blood","Cell growth rate"],a:1},
+{q:"Polyarteritis nodosa is characterized by the following",o:["Fibrinoid necrosis with neutrophils involving small arteries in diverse anatomic sites, such as heart, spleen, and testis","Granulomatous reaction at the level of the internal elastic lamina","Respiratory tract and renal disease","Related to tobacco abuse","Retinal microaneurysms"],a:0},
+{q:"Wegener granulomatosis is characterized by the following",o:["Most often, the aortic arch and its branches are affected.","Respiratory tract and renal disease","Related to tobacco abuse","The presence of microabscesses containing neutrophils is characteristic","Most commonly involves the temporal arteries"],a:1},
+{q:"The most common localization of Hodgkin's lymphoma.",o:["Lymph nodes of the neck","Lymph nodes of the abdominal cavity","Spleen","Bone marrow","Inguinal lymph nodes."],a:0},
+{q:"Microscopically, most cases of acute myocarditis are characterized by all of the following, EXCEPT",o:["Nonspecific inflammatory infiltrate","Variable amount of interstitial edema","Variable degree of myofiber degeneration","Marked fibrosis of interstitium","Variable degree of myofiber necrosis"],a:3},
+{q:"A rash beginning in the form of pink papules behind the ears that quickly becomes maculopapular and spreads over the face and down the neck, trunk, and limbs is typical of",o:["Mumps","Measles (rubeola)","Varicella","Infectious mononucleosis","Rotavirus infection"],a:1},
+{q:"Varicose veins of the lower extremities are characterized by all the following, EXCEPT",o:["Hereditary predisposition","Aggravated by pregnancy","Tend to thrombose","Overt bleeding a common complication","Varicocele is a rare complication"],a:3},
+{q:"Chicken pox virus is transmitted by the following",o:["Airborne","Contact","Transplacental","All of above","None of the above"],a:3},
+{q:"Aschoff giant cells are large mesenchymal cells derived from the following",o:["Macrophages","Fibroblasts","Lymphocytes","Eosinophils","Erythrocytes"],a:0},
+{q:"Anitschkow cells are believed to be derivative of",o:["Cardiac myocyte","Cardiac histiocyte","Endocardial smooth muscle cells","Endothelial cells of lymphatics","Lymphocytes"],a:1},
+{q:"In chronic rheumatic heart disease, the most common valvular deformities are",o:["Mitral stenosis and insufficiency","Mitral stenosis alone","Mitral insufficiency alone","Mitral and aortic stenosis combined","All of the above"],a:0},
+{q:"Hematoxylin bodies of Gross may be seen in vegetations of",o:["Rheumatic valvulitis","Libman-Sacks endocarditis","Non-bacterial thrombotic endocarditis","Subacute bacterial valvulitis","All of the above"],a:1},
+{q:"What type of inflammation develops in the trachea and bronchi due to moderate influenza?",o:["Serous-hemorrhagic","Purulent-hemorrhagic","Croupous","Catarrhal","All of above"],a:0},
+{q:"Acute rheumatic fever is characterized by the following",o:["Fusion of the commissures","Infection by group A β-hemolytic streptococci","Infection by α-hemolytic (viridans) streptococci","Infection by Staphylococcus aureus","Infection by Staphylococcus albus"],a:1},
+{q:"Libman-Sacks endocarditis is characterized by the following",o:["Fusion of the commissures","Infection by group A β-hemolytic streptococci","Infection by α-hemolytic (viridans) streptococci","Infection by Staphylococcus aureus","Warty vegetations on the undersurface of the mitral valve"],a:4},
+{q:"Shigellae cause all of the following pathologic processes, EXCEPT",o:["Hemorrhagic colitis","Hemolytic-uremic syndrome","Damage of endothelial cells in the colon microvasculature","Acute tubular necrosis","Stools containing blood, pus and mucus"],a:3},
+{q:"The most common and most severe form of lupus nephritis shows the following lesions",o:["Mesangial lupus nephritis","Focal segmental lupus nephritis","Diffuse proliferative lupus nephritis","Membranous lupus nephritis","Pyelonephritis"],a:2},
+{q:"The major complication of typhoid ulcer is",o:["Intestinal obstruction","Intestinal perforation","Malabsorption","Fistula formation","Stricture formation"],a:1},
+{q:"More than 75% of all patients with systemic lupus erythematosus show evidence of",o:["Endocarditis","Renal involvement","Nervous system involvement","Liver involvement","All of the above"],a:1},
+{q:"The renal disease of systemic lupus erythematosus may present histologically as",o:["Mesangial glomerulitis","Focal and segmental proliferative glomerulonephritis","Diffuse proliferative glomerulonephritis","Membranous nephropathy","All of the above"],a:4},
+{q:"Which of the following is not a feature of the primary form of Sjogren disease?",o:["Keratoconjunctivitis sicca","Predilection for women","Xerostomia","Symptoms of renal disease","Jaundice"],a:3},
+{q:"Primary Sjogren disease is immunologically characterized by",o:["Antibodies to RNA","Antibodies to DNA","Rheumatoid factor","Antibodies to SM antigen","All of the above"],a:2},
+{q:"Patients with progressive sclerosis (scleroderma) show",o:["Association with certain HLA haplotypes","Antinucleolar antibodies","Familial clustering","None of the above","All of the above"],a:1},
+{q:"Pathologic changes in scleroderma include",o:["Increase of collagen in the reticular dermis","Hyalinization of arterioles","Variable lymphoid infiltrates in the dermis","All of the above","None of the above"],a:3},
+{q:"Internal organs typically affected by progressive systemic sclerosis include",o:["Kidneys","Lungs","Heart","Esophagus","All of the above"],a:4},
+{q:"Features of dermatomyositis include",o:["Heliotropic rash of the eyelids","Necrosis and regeneration of skeletal muscle fibers in proximal muscles of the extremities","T-lymphocytes and natural killer cell infiltrates in the muscle","None of the above","All of the above"],a:4},
+{q:"Mixed connective tissue disease has combined features of",o:["Systemic lupus erythematosus","Scleroderma","Polymyositis","All of the above","None of the above"],a:3},
+{q:"Dryness of the mouth and eyes, together with parotid gland enlargement occurs most likely in patients with",o:["Systemic lupus erythematosus","Scleroderma","Sjogren syndrome","Dermatomyositis","Amyloidosis"],a:2},
+{q:"Circulating immune complexes are the basic cause of pathologic changes in",o:["Systemic lupus erythematosus","Scleroderma","Raynaud disease","Amyloidosis","Allergic rhinitis (hay fever)"],a:0},
+{q:"All of the following are common in systemic lupus erythematosus, except",o:["Skin rash","Endocarditis","Leukemia","Anemia","Glomerulonephritis"],a:2},
+{q:"Acute rheumatic carditis is characterized by all of the following, EXCEPT",o:["Unremarkable gross appearance of the heart","Aschoff bodies in myocardium","Diffuse nonspecific myocarditis","Aschoff bodies in joints","«Tigered effect» gross appearance"],a:4},
+{q:"The valvular effects of chronic rheumatic heart disease are all of the following, EXCEPT",o:["Thickened and deformed valve leaflets","Valvular calcification","Thickened and shortened chordae tendineae","«Fish-mouth» appearance of mitral valve","Valvular abscess formation"],a:4},
+{q:"A patient with systemic symptoms was found to have autoantibodies. The",o:["Systemic lupus erythematosus","Discoid lupus erythematosus","Sjogren syndrome","Scleroderma","Amyloidosis"],a:4},
+{q:"Haemorrhagic stroke results from the following",o:["Hypertension","Aneurysm","Vascular malformation","All of above","Bleeding diatheses"],a:3},
+{q:"The extra intestinal complications of Typhoid fever are all of the following, EXCEPT",o:["Zenker's necrosis recti","Pneumonia","Reiter's syndrome","Infective psychosis","Acute cholecystitis"],a:2},
+{q:"All the following apply to cerebral infarcts except that",o:["They may be hemorrhagic","Capillaries proliferate at the margins of necrotic brain tissue","They contain macrophages","They may give rise to cysts filled with fluid","They heal by fibrous scarring"],a:4},
+{q:"Diarrhea induced by pathogenic bacteria may be caused by all of the following pathologic mechanisms, EXCEPT",o:["Ingestion of preformed toxin, presenting in contaminated food","Infection by toxigenic organisms, which proliferate within the gut lumen and elaborate an enterotoxin","Infection by enteroinvasive organisms, which proliferate and invade mucosal epithelial cells","Infection by enteroinvasive organisms which induce hyperplasia of the mucosal epithelial cells","Infection by enteroinvasive organisms, which destroy mucosal epithelial cells"],a:3},
+{q:"Effects of hypertension on the brain include",o:["Massive hypertensive intracerebral hemorrhage","Lacunar infarcts","Slit hemorrhages","Hypertensive encephalopathy","All of the above"],a:4},
+{q:"The complications of severe bacterial enterocolitis are all of the following, EXCEPT",o:["Massive fluid loss (dehydration)","Destruction of the intestinal mucosal barrier","Perforation of the intestinal wall","Generalization of infection (sepsis)","Intestinal stenosis"],a:4},
+{q:"An infectious agent, causing scarlet fever",o:["β-hemolytic Streptococcus group A","Streptococcus agalactiae","Streptococcus viridans","Streptococcus pneumoniae","Staphylococcus aureus"],a:0},
+{q:"Primary atelectasis is defined as",o:["Incomplete expansion of a previously unexpended lung","Reduction in size of a previously expanded lung due to compression","Reduction in size of a lung due to obstruction","Reduction in lung size due to contraction","Reduction in lung size due to ageing"],a:0},
+{q:"Bronchopneumonia is grossly characterized by",o:["Diffuse consolidation of a lobe or lobes of one or both lungs","Diffuse consolidation of a lobe of one lung","Diffuse consolidation of a lobe of both lungs","Patchy consolidation of a lobe or lobes of one or both lungs","All of the above"],a:3},
+{q:"The most common causative organism for lobar pneumonia is",o:["Staphylococci","Streptococci","Pneumococci","Hemophilus","All of the above"],a:2},
+{q:"Lung defense mechanisms include",o:["Nasopharyngeal filtering action","Mucociliary action of the lower respiratory airways","Presence of phagocytozing alveolar macrophages","Secretory immunoglobulins","All of the above"],a:4},
+{q:"The microorganisms gain entry into the lungs by the following routes",o:["Inhalation","Aspiration","Hematogenous spread","Direct spread","All of the above"],a:4},
+{q:"Complications of lobar pneumonia include",o:["Organization","Empyema","Pleural effusion","Lung abscess","All of the above"],a:4},
+{q:"Average duration of initial stage at lobar pneumonia",o:["1–2 hours","1–2 days","3–5 days","1–2 weeks","None of the above"],a:1},
+{q:"Etiologic factors of bronchopneumonia",o:["Streptococcus pneumoniae","Mycobacterium tuberculosis","Staphylococcus aureus","Klebsiella pneumoniae","All of the above"],a:4},
+{q:"Typically, acute bronchitis affects",o:["Large bronchi","Terminal bronchioli","Alveoli","Respiratory bronchioli","All of the above"],a:0},
+{q:"Characteristic feature of lung abscess",o:["Formation of cavity in the lung","Destruction of lung parenchyma","Suppurative exudate","All of the above","None of the above"],a:3},
+{q:"Complications of bronchopneumonia include all of the following, EXCEPT",o:["Abscess formation","Pyothorax","Pleural fibrosis","Infective psychosis","Organization of exudate in the lumen of the alveoli"],a:3},
+{q:"The stages of lobar pneumonia include all of the following, EXCEPT",o:["Congestion","Red hepatization","Yellow hepatization","Grey hepatization","Resolution"],a:2},
+{q:"The abnormal fenestration and destruction of the walls of the alveoli, abnormal airspace and possibly blebs or bullae are common histological features of the following disease",o:["Emphysema","Chronic bronchitis","Bronchial asthma","Pneumonia","Lung abscess"],a:0},
+{q:"The abnormal dilation of the bronchi and bronchioli is the characteristic feature of the following disease",o:["Emphysema","Lung abscess","Bronchiectasis","Bronchial asthma","Pneumonia"],a:2},
+{q:"The malignant tumor of the lung",o:["Bronchogenic carcinoma","Camedocarcinoma","Bronchogenic sarcoma","Fibroadenoma","All of the above"],a:0},
+{q:"Early bronchogenic carcinomas metastases occur through the following pathways",o:["Only lymphatic","Only hematogenous","Both lymphatic and hematogenous","Direct seeding of body cavities","Direct seeding of body surfaces"],a:2},
+{q:"What type of metaplasia may occur in the respiratory tract in habitual cigarette smoker?",o:["Epithelial metaplasia: squamous to columnar","Epithelial metaplasia columnar to squamous","Metaplasia to undifferentiated mesenchymal cells","Connective tissue metaplasia","Compensatory metaplasia"],a:1},
+{q:"The most significant histological feature of well-differentiated squamous cell carcinoma",o:["Keratinization","Necrotic foci","Areas of inflammation","Hemorrhages","Abscesses"],a:0},
+{q:"Pathological feature in the skin found in meningococcemia",o:["Erythematous rash","Hemorrhagic rash","Furuncle","Impetigo","Koplic spots"],a:1},
+{q:"An infectious agent, causing diphtheria",o:["Corynebacterium","Staphylococcus","Treponema","Bordetella","Esherichia"],a:0},
+{q:"The important cause of opportunistic fungal infection",o:["Aspergillosis","Candidiasis","Actinomyces","Amebiasis","Giardiasis"],a:1},
+{q:"Chronic bronchitis is associated with all of the following pathologic changes, EXCEPT",o:["Goblet cell hyperplasia in bronchi","Goblet cell metaplasia in bronchioli","Hypertrophy of bronchial submucosal glands","Inflammatory infiltration of bronchioli","Inflammatory infiltration of alveolar walls"],a:4},
+{q:"Noncaseating pulmonary granulomas are produced by all of the following diseases, EXCEPT",o:["Chronic berylliosis","Silicosis","Sarcoidosis","Tuberculosis","Allergic exogenous alveolitis"],a:3},
+{q:"The lung carcinoma growth is characterized by all of the following, EXCEPT",o:["Invasion into the bronchial lumen","Penetration into the bronchial wall","Tumor cavitation","Peribronchial infiltration","Tuberculoma formation"],a:4},
+{q:"Lung adenocarcinoma is characterized by all of the following, EXCEPT",o:["Bronchial, bronchiolar or alveolar cell derived","Mesenchymal origin","Acinar structure","Papillary growth","Solid growth"],a:1},
+{q:"Chronic infection of the gastric mucosa is associated with the following bacteria",o:["Escherichia coli","Helicobacter pylori","Campilobacter jejuni","Enterococcus falcium","Bacillus anthracis"],a:1},
+{q:"Complications of meningococcal infection include",o:["Septicemia","Myocarditis","Neuritis","Glomerulonephritis","All of above"],a:0},
+{q:"Krukenberg tumor is characterized by the following",o:["Metastases of gastric carcinoma to the liver","Metastases of gastric carcinoma to the lungs","Metastases of lung carcinoma to the liver","Metastases of gastric carcinoma to one or both ovaries","Apical lung cancers"],a:3},
+{q:"The most common malignant tumor of the stomach",o:["Gastric lymphoma","Gastric leiomyosarcoma","Gastric carcinoma","Gastric carcinoid tumors","Adenomatous polyp"],a:2},
+{q:"What pathological process is typical for exacerbation of chronic gastric ulcer?",o:["Hyalinosis","Inflammation","Sclerosis","Necrosis","Regeneration"],a:3},
+{q:"The nature of lesion in Barrett's esophagus is",o:["Congenital anomaly","Inflammatory disease","Metaplasia process","Neoplastic lesion","All of the above"],a:2},
+{q:"Barrett's esophagus predisposes to development of",o:["Reflux esophagitis","Esophageal varices","Squamous cell carcinoma","Adenocarcinoma","All of the above"],a:3},
+{q:"Typical complications of diphtheria include",o:["Asphyxia","Demyelinization of nerves","Myocarditis","None of above","All of above"],a:4},
+{q:"Chronic gastritis may be characterized by all of the following features, EXCEPT",o:["Supurative inflammation","Lymphocyte infiltration","Plasma cell infiltration","Intestinal metaplasia","Atrophy"],a:0},
+{q:"Morphologically, all of the following zones can be found in the active ulcer base, EXCEPT",o:["Necrotic debris","Nonspecific acute inflammation","Granulomatous tissue","Granulation tissue","Fibrosis"],a:2},
+{q:"The classic peptic ulcer is grossly characterized by all of the following features, EXCEPT",o:["Round-to-oval","Sharply defined","Punchet-out defect","Elevated margins","Superficial defect"],a:4},
+{q:"Clinical manifestations of gastric carcinoma include all of the following, EXCEPT",o:["Metastase to the supraventricular lymph node (Virchow metastase)","Weight loss","Abdominal pains","Anorexia","Anuria"],a:4},
+{q:"Gastric carcinoma development is associated with all of the following pathologic conditions, EXCEPT",o:["Chronic gastritis","HBV-infection","Infection by Helicobacter pylori","Partial gastroectomy","Gastric adenomas"],a:1},
+{q:"All of the following are associated with atrophic gastritis, EXCEPT",o:["Hyperacidity of gastric contents","Pernicious anemia","Intestinal metaplasia","Hypergastrinemia","Antibodies to parietal cells of the stomach"],a:0},
+{q:"Diphtheria is characterized by the derangement of all of the following organs, EXCEPT",o:["Nasopharynx","Oropharynx","Larynx","Trachea","Esophagus"],a:4},
+{q:"What general factors are important for the development of peptic ulcer disease?",o:["Infectious, vascular","Nervous, humoral","Toxic, traumatic","Chemical, physical","Exogenous, endogenous"],a:1},
+{q:"An infectious disease with severe inflammation of the tissues of the tonsils lymphadenoid is –",o:["Tonsillitis","Pharyngitis","Laryngitis","Frontitis","Esophagitis"],a:0},
+{q:"Clinical-morphological variants of the acute form of tonsillitis are all of the following, EXCEPT",o:["Adenomatous","Catarrhal","Fibrinous","Purulent","Necrotic"],a:0},
+{q:"The histological hallmark of diagnosis of acute appendicitis is",o:["Mucosal ulceration","Impacted foreign body","Neutrophilic infiltrate in muscularis","Thrombosed blood vessels","Epithelial dysplasia"],a:2},
+{q:"Local complications of acute appendicitis are all of the following, EXCEPT",o:["Pharyngeal abscess","Thrombophlebitis","Phlegmon fiber pharynx","Sepsis","All of above"],a:3},
+{q:"The reasons for esophagitis are all of the following, EXCEPT",o:["Reflux of gastric contents into the esophagus","Chronic duodenitis","Chemical burns","Treatment with high doses of antibiotics","Traumatic injury"],a:1},
+{q:"Crohn's disease is characterized by the following histopathologic features, except",o:["Non-caseating sarcoid like granulomas","Superficial mucosal ulceration","Stricture formation in chronic cases","Widening of submucosa due to edema","Fistula formation"],a:1},
+{q:"The following features characterize ulcerative colitis, except",o:["Formation of crypt abscess and cryptitis","Superficial mucosal ulceration","Depletion of goblet cells and mucus","Stricture formation in chronic cases","Epithelial dysplasia in long-standing cases"],a:3},
+{q:"Long-standing cases of Crohn's disease may develop the following complications, except",o:["Malabsorption","Haemorrhoids","Fistula formation","Stricture formation","Malignant transformation"],a:1},
+{q:"Predisposing conditions for ischemic bowel disease is all of the following, EXCEPT",o:["Arteriolar thrombosis","Arteriolar embolism","Venous thrombosis","Helicobacter pylori infection","Portal hypertension syndrome"],a:3},
+{q:"Pathologic changes of the intestinal wall in Crohn's disease include all of the following, EXCEPT",o:["Granulomas","Areas of chronic inflammation with vasculitis","Pseudomembranous colitis","Segmental fibrosis","Slit ulcers"],a:2},
+{q:"The appendix in acute appendicitis is grossly characterized by all of the following features, EXCEPT",o:["Enlarged with thickened walls","Firm and indurated","Swollen","Hyperemic with engorged vessels","Fibrin covered serosa"],a:1},
+{q:"Injury to the liver associated with an influx of acute or chronic inflammatory cells is termed as",o:["Liver regeneration","Liver cirrhosis","Hepatoma","Liver degeneration","Hepatitis"],a:4},
+{q:"Yellow discoloration of the skin and sclera, internal organs and mucus membranes is referred to as",o:["Melanosis","Vitiligo","Nevi","Cyanosis","Jaundice"],a:4},
+{q:"Hepatic encephalopathy is due to",o:["Hypoxic damage from ischemia","Toxic damage from ammonia","Thromboembolic phenomena","Hepatopulmonary syndrome","All of the above"],a:1},
+{q:"The following hepatotropic virus is a DNA virus",o:["HAV","HBV","HCV","HEV","All of the above"],a:1},
+{q:"In chronic hepatitis В and carrier state of HBV infection, the following antigen is detected on the nuclei of infected hepatocytes",o:["HBsAg","HBeAg","HBcAg","HBV-DNA","All of the above"],a:2},
+{q:"Vast majority (more than 90%) of cases of post-transfusion hepatitis are caused by",o:["HAV","HBV","HCV","HDV","HGV"],a:2},
+{q:"The most progressive form of chronic hepatitis is caused by",o:["Hepatitis A","Hepatitis В","Hepatitis С","Hepatitis D","None of the above"],a:2},
+{q:"In fulminant hepatitis, the liver has following gross changes",o:["Weight slightly increased, capsule nodular","Weight markedly increased, capsule nodular","Weight decreased, capsule nodular","Weight markedly increased, capsule wrinkled","Weight decreased, capsule wrinkled"],a:4},
+{q:"Pancreatic carcinoma of the following site more often produces obstructive jaundice",o:["Head","Body","Tail","Uncinate process","All of the above"],a:0},
+{q:"The morphologic alterations that cause liver failure are all of the following, EXCEPT",o:["Small fatty droplets in hepatocytes","Massive hepatic necrosis","Acute inflammation","Cirrhosis","Chronic inflammation"],a:0},
+{q:"Chronic carrier state of the following hepatotropic virus infection occurs, except",o:["HAV","HBV","HCV","HDV","HGV"],a:0},
+{q:"Intrahepatic causes of portal hypertension include the following, except",o:["Cirrhosis","Budd-Chiari syndrome","Portal vein thrombosis","Metastatic tumors","Extensive fatty change"],a:2},
+{q:"The most common form of glomerulonephritis in adults is",o:["Minimal change disease","Membranous glomerulonephritis","Membranoproliferative glomerulonephritis","Focal segmental glomerulonephritis","Lupus nephritis"],a:1},
+{q:"The most frequent form of primary glomerular disease in children is",o:["Minimal change disease","Acute glomerulonephritis","Lupus nephritis","Membranous glomerulonephritis","Membranoproliferative glomerulonephritis"],a:0},
+{q:"Classic example of anti-glomerular basement membrane disease is",o:["Minimal change disease","Acute glomerulonephritis","Lupus nephritis","Membranous glomerulonephritis","Goodpasture's disease"],a:4},
+{q:"Acute post-streptococcal glomerulonephritis is characterized by proteinuria of",o:["Non-selective","Selective","Albuminuria only","Low molecular weight only","All of the above"],a:0},
+{q:"Majority of cases of membranous glomerulonephritis have following etiology",o:["Systemic lupus erythematosus","Viral infections","Fungal infection","History of drugs","Idiopathic"],a:4},
+{q:"Membranoproliferative glomerulonephritis is characterized by lobular proliferation of",o:["Epithelial cells","Endothelial cells","Mesangial cells","Leucocytes","Lymphocytes"],a:2},
+{q:"The most common mechanism in pathogenesis of chronic pyelonephritis is",o:["Ascending infection","Reflux nephropathy","Obstructive nephropathy","Hematogenous infection","Lymphogenic infection"],a:1},
+{q:"Uremia is associated with all of the following abnormalities, EXCEPT",o:["Peripheral neuropathy","Gastritis","Polycythemia","Pericarditis","Pneumonia"],a:2},
+{q:"Which type of gastritis is associated with the development of pernicious anemia?",o:["Hypertrophic gastritis","Fibrinous gastritis","Gastritis with hyperplasia of lymphoid follicles","Atrophic gastritis","Purulent gastritis."],a:3},
+{q:"Diabetes mellitus is associated with all of the following renal disorders, EXCEPT",o:["Diffuse glomerulosclerosis","Nodular glomerulosclerosis","Benign nephrosclerosis","Urate nephropathy","Acute pyelonephritis"],a:3},
+{q:"Vomiting of “coffee grounds” occurs with the destruction of red blood cells in the acidic environment of the stomach and the appearance of pigment",o:["Melanin","Hematin","Hematoidin","Hemosiderin","Porphyrin"],a:1},
+{q:"What “second” disease as a complication of the rheumatoid arthritis developed in patient?",o:["Chronic pyelonephritis","Chronic glomerulonephritis","Secondary shrinkage of kidney","Kidney amiloidosis","Interstitial nephritis"],a:3},
+{q:"In ischemic acute tubular necrosis, the following holds true",o:["Flattened tubular epithelium","There is dilatation of proximal and distal convoluted tubules","There is disruption of tubular basement membrane","All of above","Tubular lumina contain casts"],a:3},
+{q:"An important factor in cervical oncogenesis",o:["HPV-infection","Herpes simplex","Herpes zoster","Human immunodeficiency virus","Respiratory syncytial virus"],a:0},
+{q:"Endometrial hyperplasia is associated to the following",o:["High estrogenic stimulation with normal progestational activity","Normal estrogenic stimulation with increased progestational activity","High estrogenic stimulation with diminished of progestational activity","High estrogenic stimulation with increased progestational activity","Normal estrogenic stimulation and progestational activity"],a:2},
+{q:"In Paget's disease the tumor extends from the following",o:["Areola","Large ducts","Fat tissue of the breast","Connective tissue of the breast","Axillary lymph nodes"],a:1},
+{q:"Seminoma is a",o:["Benign tumor","Borderline tumor","Inflammatory process","Malignant tumor","Locally aggressive tumor"],a:3},
+{q:"Indicate the possible causes of acute renal failure?",o:["Effect of toxins and poisons","Urinary obstruction","Shock of any etiology","None of above","All of above"],a:4},
+{q:"The testicular tumors are",o:["Seminoma","Teratoma","Choriocarcinoma","Leydig cell tumor","All of above"],a:4},
+{q:"Prostatic hyperplasia affects most often",o:["Peripheral prostate","Periurethral prostate","Capsule of prostate","Periprostatic fat","Entire prostate"],a:1},
+{q:"Anaemias due to impaired red cell production",o:["Iron deficiency anaemia, Vitamin B12 and/or folic acid deficiency megaloblastic anaemia","Post-haemorrhagic anaemia","Haemolytic anaemias","Anemia due to erythrocytopathy","Anemia due to hemoglobinopathy"],a:0},
+{q:"Metastasis to the following tissues occur early in prostatic carcinoma",o:["Vertebrae","Obturator lymph node","Lungs","Brain","Bone marrow"],a:1},
+{q:"The most common localization of ectopic pregnancy",o:["Ovaries","The fallopian tubes","Abdominal cavity","Cervix","Vagina"],a:1},
+{q:"What group of anemias Sickle cell anaemia (SS) belong to?",o:["Megaloblastic anaemia","Post-haemorrhagic anaemia","Haemolytic anaemias due to intravascular haemolysis","Aplastic anaemia","Haemolytic anaemias due to exravascular haemolysis mainly"],a:4},
+{q:"Risk factors for cervical cancer development include all of the following, EXCEPT",o:["Early age at first intercourse","Multiple sexual partners","Oral contraceptive use","Alcohol abuse","HPV-infection"],a:3},
+{q:"Distant hematogenic metastases of invasive cervical carcinoma occur into all of the following, EXCEPT",o:["Liver","Lungs","Bone marrow","Lymph nodes","Kidney"],a:3},
+{q:"Cancer transformation can be caused by all of next viruses, EXCEPT",o:["HBV","Epstein-Barr virus","HPV","HIV","Flu virus"],a:4},
+{q:"Invasive carcinoma of the female breast includes all architectural subtypes, EXCEPT",o:["Invasive carcinoma of no special type","Cribriform carcinoma","Papillary carcinoma","Duct papilloma","Micropapillary carcinoma"],a:3},
+{q:"Hyperfunction of anterior pituitary in pre-pubertal children generally results in",o:["Acromegaly","Gigantism","Hyperprolactinemia","Cushing's syndrome","Cushing’s disease"],a:1},
+{q:"There is considerable depletion of colloid in the follicles in the following thyroid disease",o:["Graves' disease","Hashimoto's thyroiditis","Nodular goitre","Follicular adenoma","All of the above"],a:0},
+{q:"Secondary hyperparathyroidism secondary to disease elsewhere in the body causes",o:["Hypercalcemia","Hypocalcemia","Hematuria","Normal parathormone levels","Normocalcemia"],a:1},
+{q:"Complication of atherosclerosis of the aorta",o:["Ruptured aneurysm","Pulmonary embolism","Myocardial infarction","Brain infection","Lung infarction"],a:0},
+{q:"The following diabetes mellitus complications are",o:["Myocardial infarction","Diabetic ketoacidosis","Atherosclerosis","Diabetic nephropathy","All of above"],a:4},
+{q:"Nodular goitre is characterized by the following features, except",o:["Iodine deficiency plays role in etiology","There is repeated hyperplasia and involution","Clinical signs of systemic hypothyroidism","There is deficient thyroid hormone production","There is decreased adrenal glands hormone"],a:4},
+{q:"Clinically insulin-dependent diabetes mellitus is characterized by all of the following, EXCEPT",o:["Normal or increased blood insulin level","Normal weight","Anti-islet cell serum antibodies","Ketoacidosis","Decreased blood insulin level"],a:0},
+{q:"Clinically non-insulin-dependent diabetes mellitus is characterized by all of the following, EXCEPT",o:["Obesity","Decreased blood insulin level","No anti-islet-cell antibodies","No ketoacidosis","Normal or increased blood insulin level"],a:1},
+{q:"All of the following pathogenetic mechanisms may lead to the development of type 1 diabetes, EXCEPT",o:["HLA-linked genes and other genetic loci","Immune response against normal beta-cells","Immune response against altered beta-cells","Peripheral tissue insulin resistance","Molecular mimicry of beta-cells after viral infection"],a:3},
+{q:"What are the factors that are most important in the development of arterial hypertension",o:["Inflammation of the vessel wall","Dystrophic changes in the vessel wall","Metabolic disorders and age-related changes","Stress, excess salt intake","Chronic alcoholism"],a:3},
+{q:"Diabetic nephropathy may lead to all of the following pathologic processes, EXCEPT",o:["Nephrosclerosis","Polycystic kidney disease","Glomerulosclerosis","Tubulopathy","Pyelonephritis"],a:1},
+{q:"Diabetic microangiopathy is most prominent in the capillaries of all of the following organs, EXCEPT",o:["Liver","Skin","Skeletal muscle","Retina (eye)","Kidney"],a:0}
+];
+
+var L=['A','B','C','D','E'];
+var shuffleOn=true,reviewOn=false;
+var questions=[],idx=0,score=0,wrong=0,answered=false;
+var startTime=null,timerInt=null,elapsed=0;
+
+function ge(id){return document.getElementById(id);}
+
+function shufl(a){
+  var arr=a.slice(),i=arr.length,j,t;
+  while(i--){j=Math.floor(Math.random()*(i+1));t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  return arr;
+}
+function fmt(s){var m=Math.floor(s/60),sc=s%60;return m+':'+(sc<10?'0':'')+sc;}
+
+function showScreen(id){
+  var ids=['sStart','sQuiz','sResult'],i;
+  for(i=0;i<ids.length;i++) ge(ids[i]).className='screen';
+  ge(id).className='screen active';
+}
+
+function addEv(id,fn){
+  var el=ge(id);
+  el.addEventListener('click',fn,false);
+  el.addEventListener('touchend',function(e){e.preventDefault();fn(e);},false);
+}
+
+addEv('btnShuffle',function(){
+  shuffleOn=!shuffleOn;
+  ge('btnShuffle').className='tog'+(shuffleOn?' on':'');
+});
+addEv('btnReview',function(){
+  reviewOn=!reviewOn;
+  ge('btnReview').className='tog'+(reviewOn?' on':'');
+});
+addEv('btnStart',startQuiz);
+addEv('btnNext',nextQ);
+addEv('btnTryAgain',startQuiz);
+addEv('btnNewSession',function(){showScreen('sStart');});
+
+function startQuiz(){
+  questions=shuffleOn?shufl(QS):QS.slice();
+  idx=0;score=0;wrong=0;answered=false;elapsed=0;
+  ge('qTot').textContent=questions.length;
+  showScreen('sQuiz');
+  if(timerInt)clearInterval(timerInt);
+  startTime=Date.now();
+  timerInt=setInterval(function(){
+    elapsed=Math.floor((Date.now()-startTime)/1000);
+    ge('timerEl').textContent=fmt(elapsed);
+  },1000);
+  renderQ();
+}
+
+function renderQ(){
+  var q=questions[idx];
+  answered=false;
+  ge('qNum').textContent=idx+1;
+  ge('qLabel').textContent='Question '+(idx+1);
+  ge('progFill').style.width=((idx/questions.length)*100)+'%';
+  ge('qText').textContent=q.q;
+
+  var list=ge('optsList');
+  list.innerHTML='';
+  var i;
+  for(i=0;i<q.o.length;i++){
+    (function(i){
+      var btn=document.createElement('button');
+      btn.type='button';
+      btn.className='opt';
+      var ltr=document.createElement('span');
+      ltr.className='opt-ltr';
+      ltr.textContent=L[i];
+      var txt=document.createElement('span');
+      txt.textContent=q.o[i];
+      btn.appendChild(ltr);
+      btn.appendChild(txt);
+      if(reviewOn){
+        btn.disabled=true;
+        if(i===q.a) btn.className='opt correct';
+      } else {
+        btn.addEventListener('click',function(){pick(i);},false);
+        btn.addEventListener('touchend',function(e){e.preventDefault();pick(i);},false);
+      }
+      list.appendChild(btn);
+    })(i);
+  }
+
+  ge('fbBar').className='fb';
+  ge('btnNext').className='btn-next';
+
+  if(reviewOn){
+    ge('btnNext').className='btn-next show';
+    ge('btnNext').textContent=idx>=questions.length-1?'See Results':'Next Question \u2192';
+    showFb(true,'Review mode \u2014 correct answer highlighted.');
+    answered=true;
+  }
+}
+
+function pick(chosen){
+  if(answered)return;
+  answered=true;
+  var q=questions[idx];
+  var c=q.a;
+  var btns=ge('optsList').querySelectorAll('.opt');
+  var i;
+  for(i=0;i<btns.length;i++) btns[i].disabled=true;
+  if(chosen===c){
+    btns[chosen].className='opt correct';
+    score++;
+    showFb(true,'Correct! Well done.');
+  } else {
+    btns[chosen].className='opt wrong';
+    btns[c].className='opt correct';
+    for(i=0;i<btns.length;i++){if(i!==chosen&&i!==c) btns[i].className='opt dim';}
+    wrong++;
+    showFb(false,'Incorrect. Correct: '+L[c]+'. '+q.o[c]);
+  }
+  var nb=ge('btnNext');
+  nb.className='btn-next show';
+  nb.textContent=idx>=questions.length-1?'See Results':'Next Question \u2192';
+}
+
+function showFb(ok,msg){
+  var fb=ge('fbBar');
+  fb.className='fb show '+(ok?'ok':'ko');
+  ge('fbIcon').textContent=ok?'\u2713':'\u2717';
+  ge('fbText').textContent=msg;
+}
+
+function nextQ(){
+  if(idx>=questions.length-1){showResults();return;}
+  idx++;
+  var c=ge('qContent');
+  c.className='qc out';
+  setTimeout(function(){c.className='qc';renderQ();},160);
+}
+
+function showResults(){
+  clearInterval(timerInt);
+  var tot=questions.length;
+  var pct=Math.round((score/tot)*100);
+  var circ=2*Math.PI*62;
+  var offset=circ-(pct/100)*circ;
+  setTimeout(function(){ge('ringPath').style.strokeDashoffset=offset;},100);
+  ge('resPct').textContent=pct+'%';
+  var grades=[
+    [90,'Outstanding! \uD83C\uDFC6','Exceptional pathoanatomy knowledge.'],
+    [75,'Great Work! \uD83C\uDFAF','Strong performance across topics.'],
+    [60,'Good Effort! \uD83D\uDCDA','Keep reviewing the tricky areas.'],
+    [40,'Keep Practicing! \uD83D\uDCAA','More sessions will improve your score.'],
+    [0,'Keep Going! \uD83D\uDD04','Review the material and try again.']
+  ];
+  var i;
+  for(i=0;i<grades.length;i++){
+    if(pct>=grades[i][0]){
+      ge('resTitle').textContent=grades[i][1];
+      ge('resSub').textContent=grades[i][2];
+      break;
+    }
+  }
+  ge('resC').textContent=score;
+  ge('resW').textContent=wrong;
+  ge('resT').textContent=fmt(elapsed);
+  showScreen('sResult');
+}
+
+ge('totalN').textContent=QS.length;
+</script>
+</body>
+</html>
